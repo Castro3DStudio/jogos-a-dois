@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0d0a14">
+<title>Sintonia</title>
+<link rel="stylesheet" href="../assets/base.css">
+<style>
+.nums{display:flex;flex-wrap:wrap;justify-content:center;margin:.6rem -.2rem}
+.nums .btn{width:3.1rem;margin:.2rem;padding:.75rem 0}
+.bet .btn small{display:block;font-weight:400;color:var(--mut);font-size:.72rem;margin-top:.15rem}
+.bet .btn.on small{color:var(--acc)}
+</style>
+</head>
+<body>
+<header class="top"><a href="../">‹ Jogos</a><span class="brand">Sintonia</span><span class="pts" id="pts"></span></header>
+<main id="app"></main>
+<script src="../assets/app.js"></script>
+<script>
+(function () {
+'use strict';
+/* t: l = leve, f = fundo, p = picante. {a} = de quem é a pergunta, {p} = quem palpita. */
+var TEXTO = [
+['l','Qual cheiro leva {a} direto para a infância?'],
+['l','Que música {a} canta errado com toda a convicção?'],
+['l','Que palavra ou expressão {a} repete sem perceber?'],
+['l','Com uma tarde livre e secreta, para onde {a} iria?'],
+['l','Qual foi a compra mais inútil de que {a} não se arrepende?'],
+['l','Que comida {a} finge gostar por educação?'],
+['l','Qual mania {a} acha que ninguém nota?'],
+['l','Que barulho tira {a} do sério?'],
+['l','O que {a} sempre esquece de pôr na mala?'],
+['l','Como se chamaria o bar de {a}?'],
+['l','Que prato {a} cozinha quando quer impressionar?'],
+['l','Que famoso {a} chamaria para um jantar só de fofoca?'],
+['l','Que talento inútil dá orgulho em {a}?'],
+['l','Qual seria o superpoder mais preguiçoso que {a} escolheria?'],
+['l','Que filme {a} já viu mais vezes do que admite?'],
+['l','Qual é o pedido de {a} numa padaria às 7 da manhã?'],
+['l','Que profissão {a} teria numa vida paralela?'],
+['l','Qual bicho {a} seria, segundo {a}?'],
+['l','Que assunto faz {a} falar por vinte minutos sem respirar?'],
+['l','O que {a} compraria primeiro com um prêmio inesperado?'],
+['f','Qual elogio {a} nunca esqueceu?'],
+['f','De que {a} tinha medo quando criança?'],
+['f','Em que momento do último ano {a} sentiu mais orgulho de si?'],
+['f','Que lembrança {a} revisitaria por uma hora?'],
+['f','O que {a} faria da vida se dinheiro e opinião alheia não existissem?'],
+['f','Que conselho {a} daria para a própria versão de 15 anos?'],
+['f','O que acalma {a} quando nada mais funciona?'],
+['f','Que gesto pequeno de {p} deixa {a} bem o dia inteiro?'],
+['f','Em que momento {a} percebeu que isso aqui era sério?'],
+['f','Que hábito de {p} {a} acabou pegando?'],
+['f','O que {a} mais admira em {p} e quase nunca fala?'],
+['f','Para onde {a} viajaria amanhã com {p}?'],
+['f','Qual foi a primeira impressão que {a} teve de {p}?'],
+['f','Em que lugar {a} se sente mais em casa?'],
+['f','Que coisa {a} quer aprender antes dos 40?'],
+['f','Qual foi o dia mais feliz de {a} ao lado de {p}?'],
+['f','Que pessoa mudou o rumo da vida de {a}?'],
+['f','O que {a} gostaria de ouvir mais vezes?'],
+['p','Que roupa de {p} tira {a} do eixo?'],
+['p','Qual parte do corpo de {p} é a preferida de {a}?'],
+['p','Para {a}, qual foi a melhor noite de vocês?'],
+['p','Onde um beijo desmonta {a}?'],
+['p','Que música {a} poria para tocar numa noite a dois?'],
+['p','Que lugar inusitado {a} toparia?'],
+['p','O que {p} faz sem perceber e deixa {a} com vontade?'],
+['p','Que frase no ouvido funciona melhor com {a}?'],
+['p','Que fantasia {a} ainda não propôs?'],
+['p','Manhã, tarde ou madrugada: quando {a} tem mais vontade?'],
+['p','Que detalhe do primeiro beijo de vocês {a} lembra melhor?'],
+['p','O que {a} queria que acontecesse mais vezes entre vocês?'],
+['p','Que cheiro de {p} fica na cabeça de {a}?'],
+['p','O que {a} pensou na primeira vez que viu {p} sem roupa?']
+];
+var QUEM = [
+['l','Quem sobrevive mais tempo num apocalipse zumbi?'],
+['l','Quem pede desculpa primeiro depois de uma briga boba?'],
+['l','Quem demora mais para perceber que ganhou na loteria?'],
+['l','Quem chora primeiro num filme de cachorro?'],
+['l','Quem acaba detido por bobagem numa viagem ao exterior?'],
+['l','Quem se perde mesmo com GPS?'],
+['l','Quem gasta mais no mercado com fome?'],
+['l','Quem dorme primeiro no filme?'],
+['l','Quem conta o segredo sem querer?'],
+['l','Quem é mais dramático doente?'],
+['l','Quem ganharia um reality show na base da estratégia?'],
+['f','Quem manda mensagem primeiro depois de um silêncio?'],
+['f','Quem teima mais sabendo que está errado?'],
+['f','Quem sente mais ciúme e disfarça pior?'],
+['f','Quem toparia primeiro largar tudo e mudar de país?'],
+['f','Quem lembra melhor das datas?'],
+['f','Quem disse "eu te amo" primeiro?'],
+['f','Quem cuida mais do outro num dia ruim?'],
+['p','Quem toma mais a iniciativa?'],
+['p','Quem faz mais barulho?'],
+['p','Quem tem a imaginação mais suja?'],
+['p','Quem provoca mais em público?'],
+['p','Quem aguenta menos tempo só nos beijos?'],
+['p','Quem tira a roupa do outro mais rápido?']
+];
+var ESCALA = [
+['l','quanto {a} toparia pular de paraquedas amanhã?'],
+['l','quanto {a} gosta de surpresas?'],
+['l','que nota {a} dá para a própria comida?'],
+['l','quanto {a} confia no próprio senso de direção?'],
+['l','quanto {a} gosta de dançar quando ninguém vê?'],
+['l','quanto {a} aguentaria um mês numa cabana sem internet?'],
+['l','quanta paciência {a} tem em fila?'],
+['l','quanto {a} acredita em signo?'],
+['l','quanto {a} gosta de filme de terror?'],
+['l','quanto {a} gosta de acordar cedo no sábado?'],
+['f','quanta falta {a} sente de {p} depois de dois dias longe?'],
+['f','quanto ciúme {a} sente e não admite?'],
+['f','quanto {a} está feliz com a vida hoje?'],
+['f','quanto {a} quer ter filhos um dia?'],
+['f','quanto {a} se preocupa com o que pensam dele ou dela?'],
+['p','que nota {a} dá para o próprio beijo?'],
+['p','quanto {a} gosta de provocação em público?'],
+['p','quanta vontade {a} está sentindo agora?'],
+['p','quanto {a} gosta de mandar?'],
+['p','quanto {a} gosta de obedecer?']
+];
+var PUXA = ['Conta a história por trás disso.', 'Desde quando é assim?', 'Quem mais sabe disso?', 'Qual foi a última vez?',
+  'O palpite veio de onde?', 'Mudou com o tempo?', 'Vale um exemplo.'];
+var DECKS = [['l', 'Leve'], ['f', 'Fundo'], ['p', 'Picante'], ['*', 'Tudo']];
+
+var S = {}, N;
+function fill(q, a, p) { return JG.esc(q).replace(/\{a\}/g, '<span class="acc">' + JG.esc(N[a]) + '</span>').replace(/\{p\}/g, JG.esc(N[p])); }
+function pts() { document.getElementById('pts').innerHTML = S.deck ? '<b>' + S.sc[0] + '</b> · <b>' + S.sc[1] + '</b>' : ''; }
+function head() { return '<p class="kick">Rodada ' + (S.i + 1) + ' de ' + S.deck.length + '</p>'; }
+
+function menu() {
+  S = { tag: '*', total: 12 };
+  pts();
+  (function draw() {
+    JG.view('<h1>Sintonia</h1><p class="mut">Um responde em segredo sobre si. O outro aposta e tenta acertar. Tem também votação secreta e escala de 0 a 10.</p>' +
+      '<p class="kick">Baralho</p><div class="row">' + DECKS.map(function (d) {
+        return '<button class="btn sm' + (S.tag === d[0] ? ' on' : '') + '" data-act="tag" data-v="' + d[0] + '">' + d[1] + '</button>';
+      }).join('') + '</div><p class="kick">Rodadas</p><div class="row">' + [8, 12, 18].map(function (n) {
+        return '<button class="btn sm' + (S.total === n ? ' on' : '') + '" data-act="tot" data-v="' + n + '">' + n + '</button>';
+      }).join('') + '</div><button class="btn primary" data-act="go">Começar</button>', {
+      tag: function (el) { S.tag = el.getAttribute('data-v'); draw(); },
+      tot: function (el) { S.total = +el.getAttribute('data-v'); draw(); },
+      go: begin
+    });
+  })();
+}
+function pool(list, type) {
+  return JG.shuffle(list.filter(function (c) { return S.tag === '*' || c[0] === S.tag; })).map(function (c) { return { type: type, q: c[1] }; });
+}
+function begin() {
+  var t = pool(TEXTO, 'texto'), q = pool(QUEM, 'quem'), e = pool(ESCALA, 'escala'), deck = [], turn = Math.random() < 0.5 ? 0 : 1, i;
+  var pattern = ['texto', 'texto', 'quem', 'texto', 'escala', 'texto'];
+  for (i = 0; deck.length < S.total; i++) {
+    var want = pattern[i % pattern.length], src = want === 'texto' ? t : want === 'quem' ? q : e;
+    var c = src.pop() || t.pop() || q.pop() || e.pop();
+    if (!c) break;
+    if (c.type !== 'quem') { c.a = turn; turn = 1 - turn; }
+    deck.push(c);
+  }
+  S.deck = deck; S.i = 0; S.sc = [0, 0]; S.max = 0; S.got = 0;
+  pts(); next();
+}
+function next() {
+  if (S.i >= S.deck.length) return end();
+  var c = S.deck[S.i];
+  if (c.type === 'texto') texto(c); else if (c.type === 'quem') quem(c); else escala(c);
+}
+function done() { S.i++; pts(); next(); }
+
+/* Resposta escrita em segredo, palpite com aposta. */
+function texto(c) {
+  var a = c.a, p = 1 - a;
+  JG.pass(N[a], N[p], function () {
+    JG.view(head() + '<p class="q">' + fill(c.q, a, p) + '</p>' +
+      '<input class="input hide" id="ans" autocomplete="off" autocapitalize="sentences" placeholder="Resposta secreta de ' + JG.esc(N[a]) + '">' +
+      '<button class="btn ghost sm" data-act="eye">Mostrar o que digitei</button>' +
+      '<button class="btn primary" data-act="ok">Guardar</button><button class="btn ghost sm" data-act="skip">Trocar de pergunta</button>', {
+      eye: function () { document.getElementById('ans').classList.toggle('hide'); },
+      skip: function () { swap(c); },
+      ok: function () {
+        var v = document.getElementById('ans').value.trim(); if (!v) return;
+        c.ans = v; guess();
+      }
+    });
+  });
+  function guess() {
+    var bet = 2;
+    JG.pass(N[p], N[a], function draw() {
+      var old = document.getElementById('gs'), keep = old ? old.value : '';
+      JG.view(head() + '<p class="q">' + fill(c.q, a, p) + '</p><p class="kick">Quanto ' + JG.esc(N[p]) + ' aposta</p>' +
+        '<div class="row bet">' + [[1, 'Chute'], [2, 'Acho que sei'], [3, 'Certeza']].map(function (b) {
+          return '<button class="btn sm' + (bet === b[0] ? ' on' : '') + '" data-act="bet" data-v="' + b[0] + '">' + b[0] + '<small>' + b[1] + '</small></button>';
+        }).join('') + '</div><p class="mut small">Errar com certeza custa 1 ponto.</p>' +
+        '<input class="input" id="gs" autocomplete="off" autocapitalize="sentences" placeholder="Palpite de ' + JG.esc(N[p]) + '">' +
+        '<button class="btn primary" data-act="ok">Revelar</button>', {
+        bet: function (el) { bet = +el.getAttribute('data-v'); draw(); },
+        ok: function () { reveal(document.getElementById('gs').value.trim() || 'falou em voz alta', bet); }
+      });
+      document.getElementById('gs').value = keep;
+    }, 'A resposta de ' + JG.esc(N[a]) + ' está guardada.');
+  }
+  function reveal(g, bet) {
+    S.max += 3;
+    JG.view(head() + '<p class="mut">' + fill(c.q, a, p) + '</p><div class="vs"><div><div class="who">' + JG.esc(N[a]) + ' respondeu</div><div class="val acc">' +
+      JG.esc(c.ans) + '</div></div><div><div class="who">' + JG.esc(N[p]) + ' apostou ' + bet + '</div><div class="val">' + JG.esc(g) + '</div></div></div>' +
+      '<p class="kick">' + JG.esc(N[a]) + ' decide</p><div class="row"><button class="btn sm" data-act="j" data-v="2">Em cheio</button>' +
+      '<button class="btn sm" data-act="j" data-v="1">Quase</button><button class="btn sm" data-act="j" data-v="0">Errou</button></div>' +
+      '<p class="mut small">' + JG.pick(PUXA) + '</p>', {
+      j: function (el) {
+        var v = +el.getAttribute('data-v'), d = v === 2 ? bet : v === 1 ? 1 : (bet === 3 ? -1 : 0);
+        S.sc[p] += d; if (d > 0) S.got += d;
+        done();
+      }
+    });
+  }
+}
+function swap(c) {
+  var used = S.deck.map(function (x) { return x.q; });
+  var alt = pool(TEXTO, 'texto').filter(function (x) { return used.indexOf(x.q) < 0; })[0];
+  if (alt) c.q = alt.q;
+  next();
+}
+
+/* Os dois votam em segredo em quem dos dois. Bateu, os dois pontuam. */
+function quem(c) {
+  var first = S.i % 2, votes = [];
+  function vote(who, then) {
+    JG.pass(N[who], N[1 - who], function () {
+      JG.view(head() + '<p class="kick">Voto secreto</p><p class="q">' + JG.esc(c.q) + '</p><div class="row">' +
+        '<button class="btn" data-act="v" data-v="0">' + JG.esc(N[0]) + '</button><button class="btn" data-act="v" data-v="1">' + JG.esc(N[1]) + '</button></div>', {
+        v: function (el) { votes[who] = +el.getAttribute('data-v'); then(); }
+      });
+    });
+  }
+  vote(first, function () {
+    vote(1 - first, function () {
+      var hit = votes[0] === votes[1];
+      S.max += 2; if (hit) { S.sc[0]++; S.sc[1]++; S.got += 2; }
+      JG.view(head() + '<p class="mut">' + JG.esc(c.q) + '</p><div class="vs"><div><div class="who">' + JG.esc(N[0]) + ' votou</div><div class="val">' + JG.esc(N[votes[0]]) +
+        '</div></div><div><div class="who">' + JG.esc(N[1]) + ' votou</div><div class="val">' + JG.esc(N[votes[1]]) + '</div></div></div>' +
+        (hit ? '<h2 class="ok">Bateu. Um ponto para cada.</h2>' : '<h2 class="no">Não bateu.</h2><p class="mut">Cada um defende o próprio voto.</p>') +
+        '<button class="btn primary" data-act="n">Seguir</button>', { n: done });
+    });
+  });
+}
+
+/* Nota secreta de 0 a 10, palpite por proximidade. */
+function escala(c) {
+  var a = c.a, p = 1 - a;
+  function grid(label, then) {
+    var h = '';
+    for (var i = 0; i <= 10; i++) h += '<button class="btn" data-act="n" data-v="' + i + '">' + i + '</button>';
+    JG.view(head() + '<p class="kick">' + label + '</p><p class="q">De 0 a 10, ' + fill(c.q, a, p) + '</p><div class="nums">' + h + '</div>', {
+      n: function (el) { then(+el.getAttribute('data-v')); }
+    });
+  }
+  JG.pass(N[a], N[p], function () {
+    grid('Nota secreta de ' + JG.esc(N[a]), function (real) {
+      JG.pass(N[p], N[a], function () {
+        grid('Palpite de ' + JG.esc(N[p]), function (g) {
+          var d = Math.abs(real - g), w = d === 0 ? 3 : d === 1 ? 2 : d === 2 ? 1 : 0;
+          S.max += 3; S.sc[p] += w; S.got += w;
+          JG.view(head() + '<p class="mut">De 0 a 10, ' + fill(c.q, a, p) + '</p><div class="vs"><div><div class="who">' + JG.esc(N[a]) + '</div><div class="big acc">' + real +
+            '</div></div><div><div class="who">Palpite de ' + JG.esc(N[p]) + '</div><div class="big">' + g + '</div></div></div>' +
+            '<h2 class="' + (w ? 'ok' : 'no') + '">' + (d === 0 ? 'Na mosca. 3 pontos.' : w ? 'Perto. ' + w + (w > 1 ? ' pontos.' : ' ponto.') : 'Longe.') + '</h2>' +
+            '<p class="mut small">' + JG.pick(PUXA) + '</p><button class="btn primary" data-act="n">Seguir</button>', { n: done });
+        });
+      }, 'A nota de ' + JG.esc(N[a]) + ' está guardada.');
+    });
+  });
+}
+
+function end() {
+  var pc = S.max ? Math.round(100 * S.got / S.max) : 0, w = S.sc[0] === S.sc[1] ? -1 : S.sc[0] > S.sc[1] ? 0 : 1;
+  var t = pc >= 80 ? 'Um lê o pensamento do outro.' : pc >= 60 ? 'Sintonia fina.' : pc >= 40 ? 'Ainda há mistério. Bom sinal.' : 'Dois estranhos muito íntimos.';
+  JG.view('<p class="kick">Fim</p><div class="big acc">' + pc + '%</div><h2>' + t + '</h2>' +
+    '<div class="vs"><div><div class="who">' + JG.esc(N[0]) + '</div><div class="big">' + S.sc[0] + '</div></div><div><div class="who">' + JG.esc(N[1]) +
+    '</div><div class="big">' + S.sc[1] + '</div></div></div><p class="mut">' + (w < 0 ? 'Empate. Ninguém escolhe o próximo jogo sozinho.' :
+      JG.esc(N[w]) + ' conhece melhor e escolhe o próximo jogo.') + '</p><button class="btn primary" data-act="a">Jogar de novo</button><a class="btn ghost" href="../">Outros jogos</a>', { a: menu });
+}
+
+JG.needNames(function (n) { N = n; menu(); });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0d0a14">
+<title>Jogos a dois</title>
+<link rel="stylesheet" href="assets/base.css">
+<style>
+.tiles{display:flex;flex-wrap:wrap;margin:1rem -.4rem 0;text-align:left}
+.tile{flex:1 1 16rem;margin:.4rem;padding:1.1rem 1.1rem 1rem;border-radius:1.1rem;border:1px solid var(--line);background:var(--bg2);
+  color:var(--ink);text-decoration:none;position:relative;overflow:hidden;display:block}
+.tile:before{content:"";position:absolute;left:0;top:0;bottom:0;width:.3rem;background:var(--c)}
+.tile b{display:block;font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;font-style:italic;font-weight:500;font-size:1.5rem;color:var(--c)}
+.tile span{display:block;color:var(--mut);font-size:.88rem;margin-top:.2rem}
+.tile em{display:block;font-style:normal;font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin-top:.7rem}
+.tile.soon{opacity:.45}
+details{text-align:left;margin-top:1.4rem;color:var(--mut);font-size:.88rem}
+summary{cursor:pointer;color:var(--ink);padding:.4rem 0}
+</style>
+</head>
+<body>
+<main id="app">
+<section class="screen wide">
+  <p class="kick">Fim de semana</p>
+  <h1>Jogos a dois</h1>
+  <p class="mut" id="hello">Escolham um.</p>
+  <div class="tiles" id="tiles"></div>
+  <p><button class="btn ghost sm" id="chg" style="width:auto;display:inline-block">Trocar nomes</button></p>
+  <details>
+    <summary>Como colocar na TV</summary>
+    <p><b>Espelhando o iPhone:</b> Central de Controle, Espelhar Tela, escolher a TV. TVs Samsung e LG de 2019 em diante aceitam AirPlay. Virar o celular de lado deixa a tela maior.</p>
+    <p><b>Direto na TV:</b> abrir o navegador da TV e digitar o endereço desta página. As setas e o OK do controle remoto funcionam.</p>
+    <p><b>Controle Bluetooth:</b> pareado com o iPhone, o direcional move e o X confirma. Bolinha volta.</p>
+  </details>
+</section>
+</main>
+<script src="assets/app.js"></script>
+<script>
+(function () {
+  var G = [
+    { id: 'sintonia', n: 'Sintonia', c: '#e2b55a', d: 'Um responde em segredo, o outro tenta acertar. Com aposta.', i: '1 aparelho · 20 a 40 min' },
+    { id: 'meia-luz', n: 'Meia-Luz', c: '#d4587c', d: 'Cartas, roleta e desafios para depois que a luz baixa.', i: '1 aparelho · só para dois' },
+    { id: 'fotograma', n: 'Fotograma', c: '#56c2b2', d: 'Filme ou série por cena desenhada, fala, emoji e sinopse torta.', i: '1 aparelho · quem aperta primeiro' },
+    { id: 'dupla-chave', n: 'Dupla Chave', c: '#8b98f5', d: 'Cada um vê metade do enigma. Só sai conversando.', i: '2 aparelhos · cooperativo' }
+  ];
+  var ready = window.JG_READY || ['sintonia'];
+  document.getElementById('tiles').innerHTML = G.map(function (g) {
+    var on = ready.indexOf(g.id) >= 0;
+    return '<a class="tile' + (on ? '' : ' soon') + '" style="--c:' + g.c + '" ' + (on ? 'href="' + g.id + '/"' : '') + '><b>' + g.n + '</b><span>' + g.d +
+      '</span><em>' + (on ? g.i : 'Chegando') + '</em></a>';
+  }).join('');
+  var n = JG.names();
+  if (n) document.getElementById('hello').textContent = n[0] + ' e ' + n[1] + ', escolham um.';
+  document.getElementById('chg').onclick = function () { JG.needNames(function () { location.reload(); }, true); };
+})();
+</script>
+</body>
+</html>
