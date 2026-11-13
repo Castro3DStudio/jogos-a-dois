@@ -19,7 +19,8 @@ body:before{content:"";position:fixed;top:0;left:0;right:0;bottom:0;pointer-even
 .top .pts b{color:var(--ink)}
 .screen{position:relative;max-width:36rem;margin:0 auto;padding:.6rem 1.1rem 3rem;text-align:center;animation:in .35s ease}
 .screen.wide{max-width:60rem}
-@keyframes in{from{opacity:0;transform:translateY(.5rem)}to{opacity:1;transform:none}}
+/* Só desliza: se o navegador da TV travar a animação, o conteúdo continua visível. */
+@keyframes in{from{transform:translateY(.6rem)}to{transform:none}}
 h1{font-size:2.3rem;font-weight:500;font-style:italic;margin:.6rem 0 .3rem;color:var(--acc);line-height:1.1}
 h2{font-size:1.45rem;font-weight:500;margin:.5rem 0;line-height:1.2}
 p{margin:.6rem 0}
