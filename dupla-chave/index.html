@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0d0a14">
+<title>Dupla Chave</title>
+<link rel="stylesheet" href="../assets/base.css">
+<style>
+:root{--acc:#8b98f5;--acc-ink:#0b0d24;--glow:rgba(139,152,245,.18)}
+.code{font-size:3.4rem;letter-spacing:.4rem;font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;color:var(--acc);margin:.4rem 0}
+.gl{display:flex;flex-wrap:wrap;justify-content:center;margin:.6rem auto;max-width:24rem}
+.gl .btn,.gl .cell{width:4.6rem;height:4.6rem;margin:.25rem;padding:.5rem;position:relative;border-radius:.9rem}
+.gl .cell{border:1px solid var(--line);background:var(--bg2)}
+.gl svg{width:100%;height:100%;display:block}
+.gl i{position:absolute;top:.2rem;left:.4rem;font-style:normal;font-size:.75rem;color:var(--acc)}
+.gl .btn.hit{border-color:var(--acc);color:var(--acc)}
+.shake{animation:sh .3s}
+@keyframes sh{25%{transform:translateX(-.4rem)}75%{transform:translateX(.4rem)}}
+.clues{text-align:left;margin:.6rem 0;padding-left:1.1rem}
+.clues li{margin:.45rem 0}
+.guest{display:flex;align-items:center;margin:.35rem 0}
+.guest b{flex:0 0 4rem;text-align:left;font-weight:600}
+.guest .btn{flex:1 1 0;margin:0 0 0 .4rem;padding:.65rem .3rem;font-size:.9rem}
+.mz{display:block;width:100%;max-width:22rem;margin:.4rem auto}
+.pad{display:flex;flex-wrap:wrap;justify-content:center;width:12rem;margin:.4rem auto}
+.pad .btn{width:3.6rem;margin:.2rem;padding:.7rem 0;font-size:1.2rem}
+.pad span{width:3.6rem;margin:.2rem}
+.msg{min-height:1.4rem;font-size:.9rem}
+</style>
+</head>
+<body>
+<header class="top"><a href="../">‹ Jogos</a><span class="brand">Dupla Chave</span><span class="pts" id="pts"></span></header>
+<main id="app"></main>
+<script src="../assets/app.js"></script>
+<script>
+(function () {
+'use strict';
+/* Dois aparelhos, sem rede: o mesmo código gera os mesmos enigmas nos dois. Cada papel vê só a sua metade. */
+var S = null, clockT = null;
+var DIF = ['Morno', 'Quente', 'Fervendo'];
+var HOSP = ['Íris', 'Otto', 'Lia', 'Davi'], BEB = ['chá', 'vinho', 'café', 'gim'];
+
+function fmt(s) { s = Math.floor(s); return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2); }
+function now() { return (Date.now() - S.t0) / 1000 + S.pen; }
+function clock() {
+  clearInterval(clockT);
+  clockT = setInterval(function () { if (S && S.t0 && !S.done) document.getElementById('pts').innerHTML = '<b>' + fmt(now()) + '</b>'; }, 500);
+}
+function msg(t, bad) { var m = document.getElementById('msg'); if (m) { m.textContent = t; m.className = 'msg ' + (bad ? 'no' : 'ok'); } }
+function head(n, nome, papel) { return '<p class="kick">Sala ' + n + ' de 3 · ' + nome + '</p><p class="mut small">' + papel + '</p>'; }
+
+function menu() {
+  S = null; clearInterval(clockT); document.getElementById('pts').innerHTML = '';
+  var d = 1;
+  (function draw() {
+    JG.view('<h1>Dupla Chave</h1><p class="mut">Três salas, dois aparelhos. Cada um vê metade do enigma e ninguém pode mostrar a tela. Só vale falar.</p>' +
+      '<p class="kick">Temperatura</p><div class="row">' + DIF.map(function (n, i) {
+        return '<button class="btn sm' + (d === i ? ' on' : '') + '" data-act="d" data-v="' + i + '">' + n + '</button>';
+      }).join('') + '</div><button class="btn primary" data-act="new">Criar cofre neste aparelho</button><button class="btn" data-act="join">Entrar com o código do outro</button>', {
+      d: function (el) { d = +el.getAttribute('data-v'); draw(); },
+      'new': function () { lobby('' + (100 + Math.floor(Math.random() * 900)) + d, 0); },
+      join: function () {
+        JG.view('<p class="kick">Entrar</p><h2>Código que aparece no outro aparelho</h2><input class="input" id="cd" inputmode="numeric" maxlength="4" placeholder="0000" autocomplete="off">' +
+          '<button class="btn primary" data-act="ok">Entrar</button><button class="btn ghost sm" data-act="b">Voltar</button>', {
+          ok: function () { var v = document.getElementById('cd').value.trim(); if (/^\d{3}[0-2]$/.test(v)) lobby(v, 1); },
+          b: menu
+        });
+      }
+    });
+  })();
+}
+function lobby(code, role) {
+  S = { code: code, seed: +code, d: +code.charAt(3), role: role, pen: 0 };
+  JG.view('<p class="kick">Cofre</p><div class="code">' + code + '</div><p class="mut">' + (role === 0 ? 'No outro aparelho: Dupla Chave, "Entrar com o código do outro".' : 'Código aceito.') +
+    '</p><p>Contem até três e apertem juntos.</p><button class="btn primary" data-act="go">Começar</button>', {
+    go: function () { S.t0 = Date.now(); clock(); sala1(); }
+  });
+}
+function olho(label) { return '<button class="btn" data-act="nx">' + label + '</button>'; }
+
+/* ---------- Sala 1: Glifos ---------- */
+var P = [8, 20, 32];
+function glifo(r) {
+  var prims = [], n = 3 + Math.floor(r() * 2), i;
+  for (i = 0; i < n; i++) {
+    var t = i === 0 ? (r() < 0.5 ? 0 : 3) : Math.floor(r() * 5), need = t === 0 ? 2 : (t === 3 || t === 4) ? 3 : 1;
+    prims.push({ t: t, p: JG.shuffle([0, 1, 2, 3, 4, 5, 6, 7, 8], r).slice(0, need) });
+  }
+  return prims;
+}
+function gkey(prims, mir) {
+  return prims.map(function (q) {
+    var p = q.p.map(function (i) { return mir ? Math.floor(i / 3) * 3 + (2 - i % 3) : i; });
+    var k = q.t === 3 ? [Math.min(p[0], p[2]), Math.max(p[0], p[2]), p[1]] : p.slice().sort();
+    return q.t + ':' + k.join(',');
+  }).sort().join('|');
+}
+function gsvg(g) {
+  var h = '';
+  g.prims.forEach(function (q) {
+    var c = q.p.map(function (i) { var x = P[i % 3]; return (g.mir ? 40 - x : x) + ' ' + P[Math.floor(i / 3)]; });
+    if (q.t === 0) h += '<path d="M' + c[0] + 'L' + c[1] + '"/>';
+    else if (q.t === 1) h += '<circle cx="' + c[0].split(' ')[0] + '" cy="' + c[0].split(' ')[1] + '" r="6"/>';
+    else if (q.t === 2) h += '<circle cx="' + c[0].split(' ')[0] + '" cy="' + c[0].split(' ')[1] + '" r="3" fill="currentColor"/>';
+    else if (q.t === 3) h += '<path d="M' + c[0] + 'Q' + c[1] + ' ' + c[2] + '"/>';
+    else h += '<path d="M' + c[0] + 'L' + c[1] + 'L' + c[2] + 'z"/>';
+  });
+  return '<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">' + h + '</svg>';
+}
+function sala1() {
+  var r = JG.rng(S.seed * 7 + 1), n = [8, 12, 16][S.d], len = [4, 5, 6][S.d], set = [], keys = {};
+  /* Metade dos glifos é o espelho da outra metade: é o que obriga a descrever direito. */
+  while (set.length < n) {
+    var p = glifo(r), k = gkey(p, false), km = gkey(p, true);
+    if (k === km || keys[k] || keys[km]) continue;
+    keys[k] = keys[km] = true; set.push({ prims: p, mir: false }); set.push({ prims: p, mir: true });
+  }
+  var grid = JG.shuffle(set, r), seq = JG.shuffle(grid, r).slice(0, len);
+  if (S.role === 1) {
+    return JG.view(head(1, 'Glifos', 'Papel: olho. Só este aparelho sabe a ordem. Descreve cada símbolo, sem mostrar.') +
+      '<div class="gl">' + seq.map(function (g, i) { return '<div class="cell"><i>' + (i + 1) + '</i>' + gsvg(g) + '</div>'; }).join('') + '</div>' +
+      '<p class="mut small">Cuidado: do outro lado há símbolos espelhados.</p>' + olho('O painel abriu. Próxima sala'), { nx: sala2 });
+  }
+  var at = 0;
+  JG.view(head(1, 'Glifos', 'Papel: mão. Toca os símbolos na ordem que o outro ditar. Erro zera a sequência e custa 5 segundos.') +
+    '<div class="gl" id="gl">' + grid.map(function (g, i) { return '<button class="btn" data-act="g" data-v="' + i + '">' + gsvg(g) + '</button>'; }).join('') + '</div><p class="msg" id="msg"></p>', {
+    g: function (el) {
+      var g = grid[+el.getAttribute('data-v')];
+      if (el.className.indexOf('hit') >= 0) return;
+      if (g === seq[at]) {
+        at++; el.className = 'btn hit'; el.insertAdjacentHTML('afterbegin', '<i>' + at + '</i>'); msg(at + ' de ' + len);
+        if (at === len) setTimeout(sala2, 700);
+      } else {
+        at = 0; S.pen += 5; msg('Não era esse. Do começo.', true);
+        var box = document.getElementById('gl'); box.className = 'gl'; void box.offsetWidth; box.className = 'gl shake';
+        [].forEach.call(box.querySelectorAll('.hit'), function (b) { b.className = 'btn'; var i = b.querySelector('i'); if (i) b.removeChild(i); });
+      }
+    }
+  });
+}
+
+/* ---------- Sala 2: Hóspedes ---------- */
+function perms(n) {
+  var out = [];
+  (function go(a, rest) { if (!rest.length) return out.push(a); rest.forEach(function (x, i) { go(a.concat(x), rest.slice(0, i).concat(rest.slice(i + 1))); }); })([], Array.apply(null, Array(n)).map(function (_, i) { return i; }));
+  return out;
+}
+function sala2() {
+  var r = JG.rng(S.seed * 7 + 2), n = S.d === 0 ? 3 : 4, PP = perms(n), H = HOSP.slice(0, n), B = BEB.slice(0, n);
+  var sol = { q: PP[Math.floor(r() * PP.length)], b: PP[Math.floor(r() * PP.length)] }; /* q[h] = quarto, b[h] = bebida */
+  var who = function (s, d) { return s.b.indexOf(d); }, adj = function (a, b) { return Math.abs(a - b) === 1; };
+  var pool = [], g, h, x;
+  var add = function (txt, fn) { if (fn(sol)) pool.push({ txt: txt, fn: fn }); };
+  for (g = 0; g < n; g++) for (x = 0; x < n; x++) (function (g, x) {
+    add(H[g] + ' não está no quarto ' + (x + 1) + '.', function (s) { return s.q[g] !== x; });
+    add(H[g] + ' não pediu ' + B[x] + '.', function (s) { return s.b[g] !== x; });
+    add('Quem pediu ' + B[g] + ' está no quarto ' + (x + 1) + '.', function (s) { return s.q[who(s, g)] === x; });
+    add('Quem pediu ' + B[g] + ' não está no quarto ' + (x + 1) + '.', function (s) { return s.q[who(s, g)] !== x; });
+    if (g !== x) {
+      add(H[g] + ' e ' + H[x] + ' são vizinhos de porta.', function (s) { return adj(s.q[g], s.q[x]); });
+      add(H[g] + ' e ' + H[x] + ' não são vizinhos de porta.', function (s) { return !adj(s.q[g], s.q[x]); });
+      add('O quarto de ' + H[g] + ' tem número maior que o de ' + H[x] + '.', function (s) { return s.q[g] > s.q[x]; });
+    }
+    add('Quem pediu ' + B[g] + ' é vizinho de porta de ' + H[x] + '.', function (s) { return adj(s.q[who(s, g)], s.q[x]); });
+  })(g, x);
+  var count = function (cl) {
+    var c = 0;
+    PP.forEach(function (q) { PP.forEach(function (b) { var s = { q: q, b: b }; if (cl.every(function (k) { return k.fn(s); })) c++; }); });
+    return c;
+  };
+  var sel = [], left = count([]);
+  JG.shuffle(pool, r).forEach(function (k) {
+    if (left === 1) return;
+    var c = count(sel.concat(k)); if (c < left) { sel.push(k); left = c; }
+  });
+  for (var i = sel.length - 1; i >= 0; i--) { var t = sel.slice(0, i).concat(sel.slice(i + 1)); if (count(t) === 1) sel = t; }
+  var mine = sel.filter(function (_, i) { return i % 2 === S.role; });
+  var st = { q: [], b: [] };
+  (function draw(m, bad) {
+    JG.view(head(2, 'Hóspedes', n + ' hóspedes, ' + n + ' quartos numerados em fila, ' + n + ' bebidas. Cada aparelho tem metade das pistas. Qualquer um dos dois pode testar; erro custa 20 segundos.') +
+      '<ol class="clues">' + mine.map(function (k) { return '<li>' + k.txt + '</li>'; }).join('') + '</ol>' +
+      H.map(function (nm, g) {
+        return '<div class="guest"><b>' + nm + '</b><button class="btn sm" data-act="q" data-v="' + g + '">' + (st.q[g] == null ? 'Quarto ?' : 'Quarto ' + (st.q[g] + 1)) +
+          '</button><button class="btn sm" data-act="b" data-v="' + g + '">' + (st.b[g] == null ? 'Bebida ?' : B[st.b[g]]) + '</button></div>';
+      }).join('') + '<p class="msg ' + (bad ? 'no' : 'ok') + '" id="msg">' + (m || '') + '</p><button class="btn primary" data-act="ok">Testar a combinação</button>' +
+      '<button class="btn ghost sm" data-act="nx">O outro já abriu. Próxima sala</button>', {
+      q: function (el) { var g = +el.getAttribute('data-v'); st.q[g] = st.q[g] == null ? 0 : (st.q[g] + 1) % n; el.textContent = 'Quarto ' + (st.q[g] + 1); },
+      b: function (el) { var g = +el.getAttribute('data-v'); st.b[g] = st.b[g] == null ? 0 : (st.b[g] + 1) % n; el.textContent = B[st.b[g]]; },
+      ok: function () {
+        for (var g = 0; g < n; g++) if (st.q[g] == null || st.b[g] == null) return msg('Falta preencher.', true);
+        for (g = 0; g < n; g++) if (st.q[g] !== sol.q[g] || st.b[g] !== sol.b[g]) { S.pen += 20; return msg('Não abriu. Mais 20 segundos.', true); }
+        sala3();
+      },
+      nx: sala3
+    });
+  })();
+}
+
+/* ---------- Sala 3: Labirinto cego ---------- */
+function maze(n, r) {
+  var R = [], D = [], seen = [], x, y;
+  for (y = 0; y < n; y++) { R.push([]); D.push([]); seen.push([]); for (x = 0; x < n; x++) { R[y].push(true); D[y].push(true); seen[y].push(false); } }
+  var st = [[0, 0]]; seen[0][0] = true;
+  while (st.length) {
+    var c = st[st.length - 1], op = [[1, 0], [-1, 0], [0, 1], [0, -1]].filter(function (d) {
+      var nx = c[0] + d[0], ny = c[1] + d[1]; return nx >= 0 && ny >= 0 && nx < n && ny < n && !seen[ny][nx];
+    });
+    if (!op.length) { st.pop(); continue; }
+    var d = op[Math.floor(r() * op.length)], nx = c[0] + d[0], ny = c[1] + d[1];
+    if (d[0] === 1) R[c[1]][c[0]] = false; else if (d[0] === -1) R[ny][nx] = false; else if (d[1] === 1) D[c[1]][c[0]] = false; else D[ny][nx] = false;
+    seen[ny][nx] = true; st.push([nx, ny]);
+  }
+  return { R: R, D: D };
+}
+function open(m, x, y, dx, dy) {
+  if (dx === 1) return !m.R[y][x]; if (dx === -1) return x > 0 && !m.R[y][x - 1];
+  if (dy === 1) return !m.D[y][x]; return y > 0 && !m.D[y - 1][x];
+}
+function msvg(m, n, walls, pos) {
+  var c = 40, o = 22, W = n * c + o + 4, h = '', x, y;
+  for (x = 0; x < n; x++) h += '<text x="' + (o + x * c + c / 2) + '" y="15" text-anchor="middle">' + 'ABCDEF'.charAt(x) + '</text>';
+  for (y = 0; y < n; y++) h += '<text x="9" y="' + (o + y * c + c / 2 + 5) + '" text-anchor="middle">' + (y + 1) + '</text>';
+  if (walls) {
+    var p = 'M' + o + ' ' + o + 'h' + n * c + 'v' + n * c + 'h-' + n * c + 'z';
+    for (y = 0; y < n; y++) for (x = 0; x < n; x++) {
+      if (x < n - 1 && m.R[y][x]) p += 'M' + (o + (x + 1) * c) + ' ' + (o + y * c) + 'v' + c;
+      if (y < n - 1 && m.D[y][x]) p += 'M' + (o + x * c) + ' ' + (o + (y + 1) * c) + 'h' + c;
+    }
+    h += '<path d="' + p + '" fill="none" stroke="#f3ecdf" stroke-width="3" stroke-linecap="round"/>';
+  } else {
+    for (y = 0; y < n; y++) for (x = 0; x < n; x++) h += '<rect x="' + (o + x * c + 3) + '" y="' + (o + y * c + 3) + '" width="' + (c - 6) + '" height="' + (c - 6) + '" rx="6" fill="#221a2f"/>';
+    h += '<circle cx="' + (o + (n - 1) * c + c / 2) + '" cy="' + (o + (n - 1) * c + c / 2) + '" r="9" fill="none" stroke="#6fcf97" stroke-width="3"/>';
+    h += '<circle cx="' + (o + pos[0] * c + c / 2) + '" cy="' + (o + pos[1] * c + c / 2) + '" r="10" fill="#8b98f5"/>';
+  }
+  return '<svg class="mz" viewBox="0 0 ' + W + ' ' + W + '" font-size="12" fill="#a89eb5" font-family="sans-serif">' + h + '</svg>';
+}
+function sala3() {
+  var n = [4, 5, 6][S.d], m = maze(n, JG.rng(S.seed * 7 + 3)), pos = [0, 0];
+  if (S.role === 0) {
+    return JG.view(head(3, 'Labirinto cego', 'Papel: olho. Este aparelho vê as paredes, mas não sabe onde o outro está nem onde fica a saída. Pergunta e guia.') +
+      msvg(m, n, true) + olho('O outro saiu. Fechar o relógio'), { nx: fim });
+  }
+  var paint = function (t, bad) {
+    document.getElementById('mzbox').innerHTML = msvg(m, n, false, pos);
+    msg(t || 'Posição: ' + 'ABCDEF'.charAt(pos[0]) + (pos[1] + 1), bad);
+  };
+  (function draw(t, bad) {
+    JG.view(head(3, 'Labirinto cego', 'Papel: mão. As paredes são invisíveis aqui. Bater numa volta ao início e custa 10 segundos. A saída é o anel verde.') +
+      '<div id="mzbox">' + msvg(m, n, false, pos) + '</div><p class="msg ' + (bad ? 'no' : 'ok') + '" id="msg">' + (t || 'Posição: ' + 'ABCDEF'.charAt(pos[0]) + (pos[1] + 1)) + '</p>' +
+      '<div class="pad"><span></span><button class="btn" data-act="mv" data-v="0,-1">▲</button><span></span><button class="btn" data-act="mv" data-v="-1,0">◀</button>' +
+      '<button class="btn" data-act="mv" data-v="0,1">▼</button><button class="btn" data-act="mv" data-v="1,0">▶</button></div>', {
+      mv: function (el) {
+        var d = el.getAttribute('data-v').split(','), dx = +d[0], dy = +d[1];
+        if (!open(m, pos[0], pos[1], dx, dy)) { pos = [0, 0]; S.pen += 10; return paint('Parede. De volta a A1, mais 10 segundos.', true); }
+        pos = [pos[0] + dx, pos[1] + dy];
+        if (pos[0] === n - 1 && pos[1] === n - 1) return fim();
+        paint();
+      }
+    });
+  })();
+}
+function fim() {
+  var t = now(); S.done = true; clearInterval(clockT);
+  document.getElementById('pts').innerHTML = '<b>' + fmt(t) + '</b>';
+  var lim = [240, 420, 600][S.d];
+  JG.view('<p class="kick">Cofre aberto</p><div class="big acc">' + fmt(t) + '</div><h2>' + (t < lim ? 'Uma cabeça só, em dois corpos.' : t < lim * 2 ? 'Abriram. Com alguma discussão.' : 'Abriram. O importante é que ainda se falam.') +
+    '</h2><p class="mut">Tempo deste aparelho, com ' + S.pen + ' segundos de multa. Na próxima, troquem os papéis: quem criou o cofre entra com o código.</p>' +
+    '<button class="btn primary" data-act="a">Outro cofre</button><a class="btn ghost" href="../">Outros jogos</a>', { a: menu });
+}
+
+menu();
+})();
+</script>
+</body>
+</html>
