@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0d0a14">
+<title>Meia-Luz</title>
+<link rel="stylesheet" href="../assets/base.css">
+<style>
+:root{--acc:#d4587c;--acc-ink:#fff;--glow:rgba(212,88,124,.22)}
+.reels{display:flex;margin:1rem -.25rem}
+.reels div{flex:1 1 0;margin:0 .25rem;background:var(--bg2);border:1px solid var(--line);border-radius:.9rem;padding:1rem .4rem;min-height:5.2rem;
+  display:flex;align-items:center;justify-content:center;font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;font-size:1.1rem;line-height:1.2}
+.reels div.stop{border-color:var(--acc);color:var(--acc)}
+.clock{font-size:3.4rem;font-variant-numeric:tabular-nums;margin:.4rem 0;font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif}
+.clock.end{color:var(--acc);animation:pulse .6s 4}
+@keyframes pulse{50%{opacity:.25}}
+.rule{border:1px dashed var(--acc);border-radius:.8rem;padding:.5rem .8rem;font-size:.85rem;margin:.8rem 0;color:var(--mut)}
+.rule b{color:var(--acc);font-weight:600}
+.acts .btn small{display:block;font-weight:400;font-size:.72rem;color:var(--mut);margin-top:.15rem}
+</style>
+</head>
+<body>
+<header class="top"><a href="../">‹ Jogos</a><span class="brand">Meia-Luz</span><span class="pts" id="pts"></span></header>
+<main id="app"></main>
+<script src="../assets/app.js"></script>
+<script>
+(function () {
+'use strict';
+/* [tipo, texto, segundos]. Tipos: c confissão, d desafio, r regra, j os dois juntos. {eu} quem puxou, {tu} o outro. Segundos negativos = relógio às cegas. */
+var ATOS = [
+{ n: 'Faísca', s: 'conversa e provocação', cards: [
+['c','Conte a {tu} em que momento de hoje pensou em tirar a roupa de {tu}.'],
+['c','Descreva, com detalhes, a lembrança mais quente que tem com {tu}.'],
+['c','Diga uma coisa que {tu} faz na cama e que nunca deveria mudar.'],
+['c','Conte uma fantasia que ainda não saiu da cabeça para a vida.'],
+['c','Qual foi a vez em que mais quis {tu} e não podia?'],
+['c','Diga em que lugar do corpo de {tu} a sua atenção sempre para.'],
+['c','Complete olhando nos olhos: hoje à noite eu quero.'],
+['c','Há um pedido que dá vergonha de fazer. Faça agora.'],
+['c','Descreva {tu} em três palavras que não diria na frente da família.'],
+['c','Conte qual roupa de {tu} você mais gosta de tirar.'],
+['d','Sussurre no ouvido de {tu} o que pretende fazer até o fim da noite.'],
+['d','Beije {tu} como no primeiro beijo de vocês. Depois, como beija hoje.'],
+['d','Quente ou frio. {tu} pensa num ponto do próprio corpo. {eu} procura com a boca, guiado só por "quente" e "frio".'],
+['d','Escreva com o dedo uma palavra nas costas de {tu}. Se {tu} errar, perde uma peça de roupa. Se acertar, quem perde é {eu}.'],
+['j','Um minuto olhando nos olhos, sem falar e sem tocar. Quem rir primeiro tira uma peça.',60],
+['d','Tire uma peça de roupa de {tu}, a que escolher, bem devagar.'],
+['d','Massagem nos ombros e na nuca de {tu}.',90],
+['j','Beijo às cegas: beijem por exatamente 30 segundos, sem ver o relógio. {tu} aperta quando achar que deu.',-30],
+['d','Passe os lábios pelo pescoço de {tu} sem beijar. Só a respiração.',45],
+['r','só vale falar sussurrando'],
+['r','toda resposta termina com um beijo']
+]},
+{ n: 'Brasa', s: 'toque e pele', cards: [
+['d','Estátua. {tu} não pode se mexer nem fazer som. {eu} tem 90 segundos para fazer {tu} perder.',90],
+['j','Espelho. Por um minuto, {tu} repete em {eu} exatamente o que {eu} fizer.',60],
+['d','Vende os olhos de {tu}. Toque em três lugares com três coisas: dedos, boca, respiração. {tu} adivinha cada uma.'],
+['d','Beije o pescoço de {tu}, do ombro até a orelha, sem pressa.',60],
+['d','Tire a blusa de {tu} usando o mínimo possível das mãos.'],
+['d','{tu} escolhe um lugar do corpo. {eu} dedica a ele dois minutos inteiros de boca.',120],
+['d','Trace com a ponta dos dedos, em {tu}, o caminho que a sua boca vai fazer. Depois faça.'],
+['d','Fique por trás de {tu}, mãos livres, por um minuto. {tu} não pode se virar.',60],
+['d','Gelo ou calor. Busque algo gelado ou morno na cozinha e use em {tu}.'],
+['d','Guie a mão de {tu} pelo seu corpo e mostre exatamente como gosta.',90],
+['j','Dois minutos de beijo sem usar as mãos. Quem usar tira uma peça.',120],
+['d','{eu} fica só de roupa íntima. {tu} decide a ordem das peças.'],
+['d','Mapa. {tu} aponta três lugares onde quer ser beijado. {eu} obedece, na ordem inversa.'],
+['d','Uma mordida leve onde {tu} menos espera.'],
+['j','Dancem uma música inteira colados, no escuro.'],
+['j','Chuveiro. Cinco minutos de água quente, e só {eu} ensaboa.'],
+['c','Diga a {tu}, sem rodeio, o que quer que aconteça nos próximos dez minutos.'],
+['c','Conte o que {tu} fez da última vez e que não saiu da sua cabeça.'],
+['r','quem quiser alguma coisa precisa pedir "por favor"'],
+['r','{tu} não pode usar as mãos']
+]},
+{ n: 'Chama', s: 'sem rodeio', cards: [
+['d','Use só a boca em {tu}, onde {tu} mandar, por dois minutos.',120],
+['d','{tu} deita e fecha os olhos. {eu} faz o que quiser por dois minutos. {tu} só pode dizer "mais" ou "devagar".',120],
+['d','Comando. Por três minutos, {tu} dá as ordens e {eu} cumpre sem discutir.',180],
+['d','Leve {tu} até quase o limite e pare. Duas vezes.'],
+['j','Escolham uma posição que nunca tentaram. {eu} decide o ritmo.'],
+['d','{eu} se toca enquanto {tu} só assiste, sem poder encostar.',90],
+['d','Segure os pulsos de {tu} acima da cabeça e use só a boca.',90],
+['c','Diga a {tu}, em voz alta e sem eufemismo, o que quer agora. {tu} cumpre.'],
+['j','Mudem de cômodo. A próxima carta acontece lá.'],
+['j','Na frente de um espelho, olhando.'],
+['j','Câmera lenta. Tudo na metade da velocidade por dois minutos. Quem acelerar perde o comando.',120],
+['j','Sessenta e nove segundos de 69.',69],
+['d','{tu} escolhe: boca, mãos ou os dois. {eu} entrega por três minutos.',180],
+['j','Silêncio total por dois minutos. Quem fizer som primeiro obedece na próxima carta.',120],
+['j','Troca. Quem estava no controle passa a obedecer até a próxima carta.'],
+['d','{tu} fica de costas para {eu}. {eu} decide o resto.'],
+['c','Diga qual foi a melhor coisa que {tu} já fez com você. Peça de novo.'],
+['d','Vende os olhos de {tu}. Por dois minutos, {tu} não sabe o que vem.',120],
+['r','ninguém fala, só gestos'],
+['r','quem puxar a carta escolhe a luz e a música']
+]}];
+var REEL = [
+{ v: ['Beijar', 'Soprar de leve', 'Roçar os lábios em', 'Cheirar', 'Sussurrar algo junto a'], l: ['o pescoço', 'a orelha', 'o canto da boca', 'a nuca', 'o pulso', 'o ombro'], t: [20, 30, 45] },
+{ v: ['Beijar', 'Lamber', 'Morder de leve', 'Massagear', 'Arranhar de leve', 'Passar a ponta dos dedos em'], l: ['o pescoço', 'a barriga', 'a parte interna da coxa', 'as costas', 'o quadril', 'o peito', 'a nuca'], t: [30, 60, 90] },
+{ v: ['Beijar', 'Lamber', 'Chupar', 'Apertar', 'Provocar com os dedos'], l: ['onde {tu} apontar', 'a parte interna da coxa', 'o peito', 'o pescoço', 'abaixo do umbigo', 'o lugar preferido de {tu}'], t: [60, 90, 120] }
+];
+var MODO = ['bem devagar', 'de olhos fechados', 'sem usar as mãos', 'olhando nos olhos', 'em silêncio'];
+var TIPO = { c: 'Confissão', d: 'Desafio', j: 'Os dois', r: 'Regra' };
+var META = 7;
+
+var S, N, tick = null;
+function nm(i) { return '<span class="acc">' + JG.esc(N[i]) + '</span>'; }
+function fill(t, eu) { return JG.esc(t).replace(/\{eu\}/g, nm(eu)).replace(/\{tu\}/g, JG.esc(N[1 - eu])); }
+function stop() { if (tick) { clearInterval(tick); tick = null; } }
+function top() { document.getElementById('pts').innerHTML = S && S.on ? 'Ato <b>' + ['I', 'II', 'III'][S.ato] + '</b>' : ''; }
+
+function menu() {
+  stop(); S = { ato: 1 }; top();
+  (function draw() {
+    JG.view('<h1>Meia-Luz</h1><p class="mut">Cartas e roleta em três atos. Cada um tem dois vetos, sem explicação e sem cara feia. O jogo termina quando ninguém mais quiser olhar para a tela.</p>' +
+      '<p class="kick">Começar em</p><div class="row acts">' + ATOS.map(function (a, i) {
+        return '<button class="btn sm' + (S.ato === i ? ' on' : '') + '" data-act="a" data-v="' + i + '">' + a.n + '<small>' + a.s + '</small></button>';
+      }).join('') + '</div><button class="btn primary" data-act="go">Baixar a luz</button>', {
+      a: function (el) { S.ato = +el.getAttribute('data-v'); draw(); },
+      go: function () { S.on = true; S.vez = Math.random() < 0.5 ? 0 : 1; S.veto = [2, 2]; S.calor = 0; S.regra = null; deck(); turn(); }
+    });
+  })();
+}
+function deck() { S.deck = JG.shuffle(ATOS[S.ato].cards); S.regra = null; }
+
+function turn() {
+  stop(); top();
+  var a = ATOS[S.ato];
+  JG.view('<p class="kick">' + a.n + '</p><h2>Vez de ' + nm(S.vez) + '</h2><div class="bar"><i style="width:' + Math.min(100, 100 * S.calor / META) + '%"></i></div>' +
+    (S.regra ? '<div class="rule">Até o fim do ato, <b>' + S.regra + '</b>.</div>' : '') +
+    '<button class="btn primary" data-act="c">Puxar carta</button><button class="btn" data-act="r">Girar a roleta</button>' +
+    '<p class="mut small">Vetos: ' + JG.esc(N[0]) + ' ' + S.veto[0] + ' · ' + JG.esc(N[1]) + ' ' + S.veto[1] + '</p>' +
+    '<button class="btn ghost sm" data-act="m">Recomeçar</button>', { c: card, r: reel, m: menu });
+}
+function after(feito) {
+  stop();
+  if (feito) S.calor++;
+  S.vez = 1 - S.vez;
+  if (S.calor >= META) return ponte();
+  turn();
+}
+function ponte() {
+  S.calor = 0;
+  if (S.ato >= 2) {
+    return JG.view('<p class="kick">Chama</p><h2>O baralho acabou de dizer tudo o que sabia.</h2><p class="mut">Daqui em diante é com vocês.</p>' +
+      '<button class="btn primary" data-act="k">Mais uma rodada</button><a class="btn ghost" href="../">Largar o celular</a>', { k: function () { deck(); turn(); } });
+  }
+  JG.view('<p class="kick">Fim do ato ' + ['I', 'II'][S.ato] + '</p><h2>' + ATOS[S.ato + 1].n + '</h2><p class="mut">Próximo ato: ' + ATOS[S.ato + 1].s + '.</p>' +
+    '<button class="btn primary" data-act="up">Subir</button><button class="btn ghost" data-act="st">Ficar mais um pouco aqui</button>', {
+    up: function () { S.ato++; deck(); turn(); },
+    st: function () { deck(); turn(); }
+  });
+}
+function clock(sec) {
+  if (!sec) return '';
+  if (sec < 0) return '<div class="clock" id="ck">?</div><button class="btn sm" data-act="blind">Começar, sem olhar</button>';
+  return '<div class="clock" id="ck">' + fmt(sec) + '</div><button class="btn sm" data-act="tm">Iniciar relógio</button>';
+}
+function fmt(s) { return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2); }
+function handlers(sec, eu, veto) {
+  var left = sec, t0 = 0;
+  return {
+    tm: function (el) {
+      if (tick) { stop(); el.textContent = 'Continuar'; return; }
+      el.textContent = 'Pausar';
+      tick = setInterval(function () {
+        var ck = document.getElementById('ck'); if (!ck) return stop();
+        left--; ck.textContent = fmt(Math.max(0, left));
+        if (left <= 0) { stop(); ck.className = 'clock end'; el.textContent = 'Tempo'; el.disabled = true; if (navigator.vibrate) navigator.vibrate([200, 100, 200]); }
+      }, 1000);
+    },
+    blind: function (el) {
+      var ck = document.getElementById('ck');
+      if (!t0) { t0 = Date.now(); el.textContent = 'Parar'; ck.textContent = '···'; return; }
+      var got = (Date.now() - t0) / 1000, d = Math.abs(got + sec);
+      ck.textContent = got.toFixed(1) + 's'; ck.className = 'clock end'; el.disabled = true;
+      el.textContent = d < 2 ? 'Quase perfeito' : d < 6 ? 'Passou perto' : 'Se perderam no tempo';
+    },
+    ok: function () { after(true); },
+    veto: function () { if (S.veto[veto] > 0) { S.veto[veto]--; after(false); } }
+  };
+}
+function buttons(veto) {
+  return '<div class="row"><button class="btn primary" data-act="ok">Feito</button><button class="btn" data-act="veto"' + (S.veto[veto] ? '' : ' disabled') +
+    '>Veto de ' + JG.esc(N[veto]) + ' (' + S.veto[veto] + ')</button></div>';
+}
+function card() {
+  if (!S.deck.length) deck();
+  var c = S.deck.pop(), eu = S.vez;
+  if (c[0] === 'r') {
+    S.regra = fill(c[1], eu);
+    return JG.view('<p class="kick">Regra</p><p class="q">Até o fim deste ato, ' + S.regra + '.</p><button class="btn primary" data-act="ok">Valendo</button>', { ok: function () { after(true); } });
+  }
+  /* Confissão: o veto é de quem puxou a carta. Nas demais: de quem recebe. */
+  var veto = c[0] === 'c' ? eu : 1 - eu;
+  JG.view('<p class="kick">' + TIPO[c[0]] + ' · ' + JG.esc(N[eu]) + '</p><p class="q">' + fill(c[1], eu) + '</p>' + clock(c[2]) + buttons(veto), handlers(c[2] || 0, eu, veto));
+}
+function reel() {
+  var R = REEL[S.ato], eu = S.vez, res = [JG.pick(R.v), JG.pick(R.l), JG.pick(MODO)], sec = JG.pick(R.t), n = 0;
+  JG.view('<p class="kick">Roleta · ' + JG.esc(N[eu]) + ' faz em ' + JG.esc(N[1 - eu]) + '</p><div class="reels"><div id="r0"></div><div id="r1"></div><div id="r2"></div></div><div id="out"></div>', {});
+  var pools = [R.v, R.l, MODO];
+  tick = setInterval(function () {
+    n++;
+    for (var i = 0; i < 3; i++) {
+      var el = document.getElementById('r' + i); if (!el) return stop();
+      var done = n > 10 + i * 8;
+      el.innerHTML = fill(done ? res[i] : JG.pick(pools[i]), eu);
+      if (done) el.className = 'stop';
+    }
+    if (n > 28) {
+      stop();
+      document.getElementById('out').innerHTML = clock(sec) + buttons(1 - eu);
+      var h = handlers(sec, eu, 1 - eu);
+      JG.view(document.querySelector('.screen').innerHTML, h);
+    }
+  }, 90);
+}
+
+JG.needNames(function (n) { N = n; menu(); });
+})();
+</script>
+</body>
+</html>
