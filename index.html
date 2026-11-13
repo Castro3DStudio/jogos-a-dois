@@ -46,7 +46,7 @@ summary{cursor:pointer;color:var(--ink);padding:.4rem 0}
     { id: 'fotograma', n: 'Fotograma', c: '#56c2b2', d: 'Filme ou série por cena desenhada, fala, emoji e sinopse torta.', i: '1 aparelho · quem aperta primeiro' },
     { id: 'dupla-chave', n: 'Dupla Chave', c: '#8b98f5', d: 'Cada um vê metade do enigma. Só sai conversando.', i: '2 aparelhos · cooperativo' }
   ];
-  var ready = ['sintonia', 'meia-luz'];
+  var ready = ['sintonia', 'meia-luz', 'fotograma'];
   document.getElementById('tiles').innerHTML = G.map(function (g) {
     var on = ready.indexOf(g.id) >= 0;
     return '<a class="tile' + (on ? '' : ' soon') + '" style="--c:' + g.c + '" ' + (on ? 'href="' + g.id + '/"' : '') + '><b>' + g.n + '</b><span>' + g.d +

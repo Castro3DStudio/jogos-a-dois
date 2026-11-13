@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0d0a14">
+<title>Fotograma</title>
+<link rel="stylesheet" href="../assets/base.css">
+<style>
+:root{--acc:#56c2b2;--acc-ink:#04201c;--glow:rgba(86,194,178,.18)}
+.scene{border-radius:1rem;overflow:hidden;border:1px solid var(--line);background:#000;margin:.6rem 0}
+.scene svg{display:block;width:100%;height:auto;-webkit-filter:blur(16px);filter:blur(16px);-webkit-transform:scale(2.6);transform:scale(2.6);
+  -webkit-transition:-webkit-filter 18s linear,-webkit-transform 18s ease-out;transition:filter 18s linear,transform 18s ease-out}
+.scene.go svg,.scene.full svg{-webkit-filter:none;filter:none;-webkit-transform:none;transform:none}
+.scene.full svg{-webkit-transition:none;transition:none}
+.emo{font-size:3.6rem;line-height:1.2;margin:1.2rem 0;letter-spacing:.2rem}
+.val{display:inline-block;border:1px solid var(--acc);color:var(--acc);border-radius:2rem;padding:.15rem .8rem;font-size:.85rem}
+#extra{min-height:.5rem}
+#extra .emo{font-size:2.2rem;margin:.4rem 0}
+#extra .q{font-size:1.1rem;margin:.4rem 0}
+</style>
+</head>
+<body>
+<header class="top"><a href="../">‹ Jogos</a><span class="brand">Fotograma</span><span class="pts" id="pts"></span></header>
+<main id="app"></main>
+<script src="../assets/app.js"></script>
+<script>
+(function () {
+'use strict';
+/* Cenas desenhadas à mão em SVG, 320x180. Um objeto ou um canto da história, nunca o cartaz. */
+var SV = {
+titanic: '<rect width="320" height="180" fill="#0a1430"/><g fill="#fff"><circle cx="30" cy="22" r="1.4"/><circle cx="92" cy="40" r="1"/><circle cx="150" cy="18" r="1.6"/><circle cx="214" cy="34" r="1"/><circle cx="286" cy="20" r="1.3"/><circle cx="250" cy="56" r="1"/></g><path d="M236 104l16-44 12 16 10-26 22 54z" fill="#cfe6ff"/><rect y="104" width="320" height="76" fill="#10294f"/><path d="M96 126l104-12 16 14-104 14z" fill="#9a6a3c"/><path d="M112 127l80-9M118 134l82-10" stroke="#6e4623" stroke-width="2"/><path d="M0 152q20-8 40 0t40 0 40 0 40 0 40 0 40 0 40 0 40 0M0 168q20-8 40 0t40 0 40 0 40 0 40 0 40 0 40 0 40 0" stroke="#27518c" stroke-width="2" fill="none"/>',
+up: '<rect width="320" height="180" fill="#8fd0f5"/><ellipse cx="52" cy="142" rx="34" ry="10" fill="#fff" opacity=".8"/><ellipse cx="268" cy="108" rx="30" ry="9" fill="#fff" opacity=".8"/><path d="M160 118L130 64M160 118L150 52M160 118L172 48M160 118L192 62M160 118L160 90" stroke="#555" stroke-width=".7"/><circle cx="130" cy="52" r="13" fill="#e94f4f"/><circle cx="150" cy="38" r="14" fill="#f2c94c"/><circle cx="172" cy="34" r="14" fill="#3aa0e0"/><circle cx="192" cy="50" r="13" fill="#6fcf97"/><circle cx="142" cy="68" r="13" fill="#bb6bd9"/><circle cx="163" cy="56" r="14" fill="#f2994a"/><circle cx="182" cy="70" r="13" fill="#e94f4f"/><circle cx="160" cy="82" r="11" fill="#f2c94c"/><rect x="143" y="118" width="34" height="26" fill="#f4e2a0"/><path d="M138 120l22-16 22 16z" fill="#a0522d"/><rect x="156" y="130" width="8" height="14" fill="#7b4a2a"/>',
+forrest: '<rect width="320" height="180" fill="#cfe8f0"/><rect y="132" width="320" height="48" fill="#7fb069"/><rect x="86" y="86" width="148" height="8" fill="#ece4d4"/><rect x="86" y="110" width="148" height="8" fill="#ece4d4"/><path d="M96 94v46M224 94v46M110 118v22M210 118v22" stroke="#b9ad98" stroke-width="5"/><rect x="146" y="98" width="28" height="12" fill="#fff"/><path d="M160 98v12M146 104h28" stroke="#d7263d" stroke-width="2"/><rect x="196" y="96" width="26" height="14" rx="2" fill="#8b5e3c"/><path d="M236 44q16-12 26 0-14 12-26 0zM236 44l-12 8" fill="#fff" stroke="#fff" stroke-width="1.5"/>',
+it: '<rect width="320" height="180" fill="#5b6470"/><rect y="108" width="320" height="12" fill="#8a929c"/><rect y="120" width="320" height="60" fill="#3b4048"/><rect x="200" y="110" width="74" height="10" fill="#0b0b0b"/><path d="M232 78q-7 14 3 30" stroke="#ddd" fill="none"/><circle cx="232" cy="60" r="18" fill="#d7263d"/><path d="M78 142h42l-9 12H87z" fill="#f2d04c"/><path d="M100 142v-19l15 19z" fill="#f6de7a"/><path d="M30 10l-6 20M90 30l-6 20M150 6l-6 20M290 24l-6 20M60 70l-6 20M180 50l-6 20" stroke="#aeb7c2" stroke-width="1.5"/>',
+origem: '<rect width="320" height="180" fill="#2a211b"/><rect x="22" y="18" width="64" height="64" fill="#f1d9a0" opacity=".22"/><rect y="122" width="320" height="58" fill="#6b4a2f"/><ellipse cx="160" cy="126" rx="20" ry="3.5" opacity=".45"/><path d="M164 74l-3 16" stroke="#c9ced6" stroke-width="4"/><path d="M144 90h32l-17 34z" fill="#c9ced6"/><path d="M128 100q32 14 64 0M136 108q24 10 48 0" stroke="#c9ced6" fill="none" opacity=".45"/>',
+bb: '<rect width="320" height="180" fill="#f3c98b"/><circle cx="270" cy="34" r="16" fill="#fff3c4"/><path d="M0 180V120L160 70l160 50v60z" fill="#8a4b32"/><path d="M0 142L160 92l160 50M0 164l160-50 160 50" stroke="#6f3a26" stroke-width="2" fill="none"/><g transform="rotate(17 206 112)"><ellipse cx="206" cy="112" rx="34" ry="12" fill="#e8b04a"/><ellipse cx="206" cy="112" rx="28" ry="9" fill="#f3d27a"/><circle cx="192" cy="110" r="3" fill="#b23a2a"/><circle cx="208" cy="115" r="3" fill="#b23a2a"/><circle cx="220" cy="109" r="3" fill="#b23a2a"/><circle cx="204" cy="106" r="2.5" fill="#b23a2a"/></g>',
+st: '<rect width="320" height="180" fill="#b89b72"/><path d="M0 0v180M40 0v180M80 0v180M120 0v180M160 0v180M200 0v180M240 0v180M280 0v180" stroke="#a88a60" stroke-width="6"/><path d="M0 28q40 22 80 0t80 0 80 0 80 0" stroke="#222" fill="none"/><circle cx="20" cy="36" r="4" fill="#e94f4f"/><circle cx="60" cy="36" r="4" fill="#3aa0e0"/><circle cx="100" cy="36" r="4" fill="#f2c94c"/><circle cx="140" cy="36" r="4" fill="#6fcf97"/><circle cx="180" cy="36" r="7" fill="#fff6c9"/><circle cx="220" cy="36" r="4" fill="#bb6bd9"/><circle cx="260" cy="36" r="4" fill="#f2994a"/><circle cx="300" cy="36" r="4" fill="#e94f4f"/><g font-family="Georgia,serif" font-size="24" fill="#1b1b1b" text-anchor="middle"><text x="160" y="84">A B C D E F G H</text><text x="160" y="120">I J K L M N O P Q</text><text x="160" y="156">R S T U V W X Y Z</text></g>',
+friends: '<rect width="320" height="180" fill="#d9c9a8"/><rect x="106" width="108" height="180" fill="#6a4c93"/><path d="M118 10h84v70h-84zM118 96h84v74h-84z" fill="none" stroke="#5a3f80" stroke-width="3"/><rect x="143" y="34" width="34" height="42" rx="6" fill="none" stroke="#f2c94c" stroke-width="6"/><circle cx="160" cy="55" r="4" fill="#222"/><circle cx="200" cy="100" r="5" fill="#c9a227"/>',
+matrix: '<rect width="320" height="180" fill="#020a04"/><path d="M20 0v180M52 0v180M84 0v180M116 0v180M204 0v180M236 0v180M268 0v180M300 0v180" stroke="#1f8f3a" stroke-width="6" stroke-dasharray="7 9" opacity=".7"/><rect x="84" y="78" width="64" height="26" rx="13" fill="#d7263d"/><rect x="172" y="78" width="64" height="26" rx="13" fill="#2d7dd2"/><path d="M96 86h30M184 86h30" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".5"/>',
+jurassic: '<rect width="320" height="180" fill="#1c2a2e"/><path d="M40 0l-10 40M110 10l-10 40M250 0l-10 40M290 30l-10 40M190 6l-10 30" stroke="#5e7a82" stroke-width="2"/><rect y="118" width="320" height="62" fill="#2b2b2b"/><path d="M134 58h52l-7 62h-38z" fill="#dfeef5" opacity=".8"/><ellipse cx="160" cy="72" rx="23" ry="5" fill="#9fd3e6"/><ellipse cx="160" cy="72" rx="15" ry="3" fill="none" stroke="#fff"/><ellipse cx="160" cy="72" rx="7" ry="1.5" fill="none" stroke="#fff"/>',
+leao: '<rect width="320" height="180" fill="#f6a04d"/><circle cx="170" cy="126" r="54" fill="#ffd76a"/><rect y="146" width="320" height="34" fill="#5b2e12"/><path d="M0 180V118l116-22 96-28-14 30-48 14-40 36v32z" fill="#3a1d0c"/>',
+toy: '<rect width="320" height="180" fill="#7ec8e3"/><g fill="#fff"><ellipse cx="50" cy="40" rx="26" ry="10"/><ellipse cx="270" cy="60" rx="26" ry="10"/><ellipse cx="60" cy="140" rx="26" ry="10"/><ellipse cx="264" cy="150" rx="22" ry="9"/></g><rect x="108" y="14" width="104" height="152" rx="44" fill="#7a4a2b"/><rect x="118" y="24" width="84" height="132" rx="36" fill="#8f5a36"/><text x="160" y="100" font-family="Comic Sans MS,Marker Felt,cursive" font-size="30" fill="#1b1b1b" text-anchor="middle" transform="rotate(-8 160 90)">ANDY</text>',
+got: '<rect width="320" height="180" fill="#9fb4c7"/><rect y="38" width="320" height="142" fill="#e6f1f8"/><path d="M30 38v130M84 38v130M132 38v130M190 38v130M286 38v130" stroke="#c5d9e6" stroke-width="5"/><path d="M250 38v128" stroke="#555"/><rect x="245" y="116" width="10" height="9" fill="#333"/><path d="M0 180v-14l14-18 12 18 12-22 14 22 12-16 12 16 14-20 14 20h216v14z" fill="#22303a"/><g fill="#fff"><circle cx="40" cy="20" r="1.5"/><circle cx="120" cy="12" r="1.5"/><circle cx="210" cy="24" r="1.5"/><circle cx="290" cy="10" r="1.5"/></g>',
+round6: '<rect width="320" height="180" fill="#d94f70"/><circle cx="160" cy="90" r="66" fill="#c0c5cc"/><circle cx="160" cy="90" r="52" fill="#d9a441"/><path d="M128 94q32-48 64 0zM160 94v26q0 9-9 9" fill="none" stroke="#9b6f1f" stroke-width="3"/><path d="M222 34l-34 40" stroke="#f1f1f1" stroke-width="2"/>',
+et: '<rect width="320" height="180" fill="#0b1026"/><circle cx="160" cy="84" r="64" fill="#f4f1d0"/><g stroke="#111" stroke-width="3" fill="none"><circle cx="130" cy="112" r="12"/><circle cx="190" cy="112" r="12"/><path d="M130 112l18-26h30l12 26M148 86l14 26 16-26M178 86l-4-10h12"/></g><circle cx="152" cy="68" r="7" fill="#111"/><path d="M146 76h12l4 12h-18z" fill="#111"/><rect x="186" y="72" width="14" height="10" fill="#111"/><circle cx="193" cy="70" r="5" fill="#111"/><path d="M0 180v-26l22-24 18 24 26-18 24 26h230v18z" fill="#05070f"/>',
+pulp: '<rect width="320" height="180" fill="#1a1410"/><ellipse cx="160" cy="104" rx="110" ry="60" fill="#ffd76a" opacity=".14"/><path d="M100 110l8-54h104l8 54z" fill="#3a3a3a"/><ellipse cx="160" cy="110" rx="56" ry="20" fill="#ffd76a"/><ellipse cx="160" cy="108" rx="36" ry="11" fill="#fff6c9"/><rect x="100" y="110" width="120" height="38" fill="#262626"/><rect x="152" y="112" width="16" height="8" fill="#c9a227"/>',
+bttf: '<rect width="320" height="180" fill="#0d1321"/><rect x="149" y="28" width="22" height="44" fill="#2a3350"/><circle cx="160" cy="42" r="7" fill="#f4f1d0"/><path d="M178 4l-9 14h8l-10 14" stroke="#fff" stroke-width="2" fill="none"/><path d="M96 180L150 72h20l54 108z" fill="#1e2230"/><path d="M116 180L152 76M204 180L168 76" stroke="#ff8c1a" stroke-width="8" stroke-linecap="round"/><path d="M116 180L152 76M204 180L168 76" stroke="#ffe08a" stroke-width="2.5" stroke-linecap="round"/>',
+truman: '<rect width="320" height="180" fill="#8ecdf2"/><g fill="#fff" opacity=".9"><ellipse cx="60" cy="50" rx="34" ry="11"/><ellipse cx="130" cy="96" rx="30" ry="9"/><ellipse cx="282" cy="40" rx="26" ry="9"/></g><path d="M132 172h20v-13h20v-13h20v-13h20v-13h20v52z" fill="#a9d7f3" stroke="#6fb2de"/><rect x="232" y="72" width="26" height="48" fill="#0b0b0b"/><rect y="172" width="320" height="8" fill="#3f8fc0"/>',
+office: '<rect width="320" height="180" fill="#dfe3e6"/><rect y="134" width="320" height="46" fill="#b08968"/><ellipse cx="160" cy="136" rx="62" ry="8" fill="#fff"/><rect x="138" y="106" width="44" height="8" fill="#333"/><rect x="142" y="97" width="38" height="9" rx="3" fill="#b23a2a"/><path d="M116 134q0-58 44-58t44 58z" fill="#f2c94c" opacity=".72"/>',
+walle: '<rect width="320" height="180" fill="#c9a66b"/><path d="M0 180v-70h40v-30h34v50h30v-66h40v80h176v36z" fill="#a98652" opacity=".7"/><path d="M0 180v-24q80-16 160 0t160 0v24z" fill="#7a5a34"/><path d="M130 156v-46h22v26l30 6q9 2 9 14z" fill="#4a3a2a"/><path d="M141 110V90" stroke="#3fa34d" stroke-width="3"/><path d="M141 96q-13-2-13-13 13 0 13 13zM141 91q13-2 13-13-13 0-13 13z" fill="#3fa34d"/>',
+shrek: '<rect width="320" height="180" fill="#cfe8c9"/><rect y="142" width="320" height="38" fill="#5e7f3b"/><ellipse cx="250" cy="160" rx="50" ry="8" fill="#48652b"/><rect x="135" y="60" width="50" height="84" fill="#8b5e3c"/><path d="M128 62l32-19 32 19z" fill="#5a3a22"/><path d="M147 60v84M160 60v84M173 60v84" stroke="#74492b"/><path d="M165 84a8 8 0 1 1-9-9 6 6 0 0 0 9 9z" fill="#2b1a0e"/><path d="M80 142v-22" stroke="#6b4423" stroke-width="4"/><rect x="58" y="100" width="44" height="20" fill="#e8dcc0"/><path d="M66 110h28" stroke="#b23a2a" stroke-width="3"/>',
+frozen: '<rect width="320" height="180" fill="#dff3fb"/><ellipse cx="160" cy="46" rx="44" ry="15" fill="#fff" stroke="#b7d3e0"/><ellipse cx="136" cy="54" rx="22" ry="10" fill="#fff"/><g fill="#7fb7d6"><circle cx="134" cy="76" r="2"/><circle cx="158" cy="88" r="2"/><circle cx="182" cy="74" r="2"/><circle cx="168" cy="104" r="2"/><circle cx="146" cy="110" r="2"/></g><ellipse cx="160" cy="146" rx="74" ry="15" fill="#a8d8ee"/><path d="M150 138l36 6-36 6z" fill="#f2994a"/><circle cx="118" cy="144" r="4" fill="#222"/><circle cx="132" cy="151" r="4" fill="#222"/><circle cx="200" cy="148" r="4" fill="#222"/><path d="M100 134l-20-10M216 140l24-8" stroke="#6b4423" stroke-width="3"/>'
+};
+/* [título, tipo (f filme, a animação, s série), emojis, sinopse torta, fala, cena] */
+var T = [
+['Titanic','f','🚢🧊🚪','Moça rica conhece rapaz pobre numa viagem. Havia espaço para os dois na porta.','Eu sou o rei do mundo!','titanic'],
+['Forrest Gump','f','🏃🍫🦐','Homem conta a vida inteira para estranhos num ponto de ônibus.','Corre, Forrest, corre!','forrest'],
+['A Origem','f','💤🌀🏙️','Equipe invade a soneca de um herdeiro. Ninguém sabe se o pião caiu.','','origem'],
+['Matrix','f','💊🕶️🐇','Programador descobre que o emprego era ainda mais falso do que parecia.','Não existe colher.','matrix'],
+['Jurassic Park','f','🦖🚙🥤','Milionário abre um parque sem ler o parecer do matemático.','','jurassic'],
+['E.T.','f','👽🚲🌕','Criança esconde um visitante no armário e ensina a usar o telefone.','','et'],
+['De Volta para o Futuro','f','⚡🚗⏰','Adolescente quase impede o próprio nascimento porque a mãe gostou dele.','Para onde vamos, não precisamos de estradas.','bttf'],
+['Pulp Fiction','f','💼🍔💉','Dois funcionários discutem hambúrguer antes do expediente. A maleta brilha.','','pulp'],
+['O Show de Truman','f','📺🌊🚪','Vendedor de seguros descobre que os vizinhos são pagos para gostar dele.','','truman'],
+['It: A Coisa','f','🎈🤡⛵','Palhaço tem dificuldade em manter a clientela infantil de uma cidade pequena.','','it'],
+['Harry Potter','f','⚡👓🦉','Órfão descobre que é rico e famoso e mesmo assim precisa ir à escola.','',''],
+['O Senhor dos Anéis','f','💍🌋🧙','Nove amigos fazem uma caminhada longa para devolver uma joia.','Você não vai passar!',''],
+['Star Wars','f','⚔️🌌🤖','Jovem do interior descobre quem é o pai da pior maneira possível.','Que a Força esteja com você.',''],
+['Vingadores: Ultimato','f','🧤💎⏳','Colegas de trabalho voltam ao passado para desfazer um estalo.','',''],
+['Interestelar','f','🌽🕳️⌚','Pai sai para o trabalho e volta mais novo que a filha.','',''],
+['Homem-Aranha','f','🕷️🕸️🍕','Entregador de pizza atrasado mantém um segundo emprego não remunerado.','Com grandes poderes vêm grandes responsabilidades.',''],
+['Piratas do Caribe','f','🏴‍☠️🧭🍾','Capitão sem navio confia numa bússola que não aponta para o norte.','',''],
+['O Diabo Veste Prada','f','👠☕📱','Assistente aprende que azul-cerúleo não é só azul.','Isso é tudo.',''],
+['Meninas Malvadas','f','💗📓🚌','Aluna nova se infiltra no grupo popular. Às quartas, o uniforme é rosa.','',''],
+['Barbie','f','💖🛼🏖️','Boneca tem crise existencial e vai de patins até o mundo real.','',''],
+['Oppenheimer','f','💥🎩⚛️','Físico entrega o trabalho no prazo e se arrepende para sempre.','',''],
+['Avatar','f','🔵🌳🐉','Militar muda de lado depois de conhecer a filha do chefe. Todos são azuis.','',''],
+['Cidade de Deus','f','🐔📷🏘️','Menino quer ser fotógrafo num lugar de onde até a galinha tenta fugir.','',''],
+['Tropa de Elite','f','💀🎓🚓','Capitão procura um substituto e narra tudo.','Pede pra sair!',''],
+['O Auto da Compadecida','f','🐕✝️🌵','Dois amigos enterram uma cachorra em latim e vão parar no julgamento final.','Não sei, só sei que foi assim.',''],
+['Parasita','f','🪨🏠🍑','Família inteira arruma emprego na mesma casa sem contar que se conhece.','',''],
+['Coringa','f','🤡🪜💃','Comediante sem graça desce uma escadaria dançando.','',''],
+['Crepúsculo','f','🧛🍎🌲','Adolescente se muda para a cidade mais nublada do país e se apaixona pelo colega que brilha.','',''],
+['Como Se Fosse a Primeira Vez','f','🍍📼🧠','Todo dia ele reconquista a mesma mulher, que acorda sem lembrar dele.','',''],
+['Diário de uma Paixão','f','📔🌧️🚣','Um senhor lê a mesma história para a mesma senhora todos os dias.','',''],
+['Up: Altas Aventuras','a','🎈🏠👴','Viúvo foge da casa de repouso levando a casa junto.','','up'],
+['O Rei Leão','a','🦁👑🌅','Tio ambicioso reorganiza a sucessão da empresa da família.','','leao'],
+['Toy Story','a','🤠🚀🧸','Funcionário antigo tem ciúme do colega novo, que acha que voa.','Ao infinito e além!','toy'],
+['Procurando Nemo','a','🐠🤿🦈','Pai superprotetor atravessa o oceano com uma amiga que esquece tudo.','Continue a nadar.',''],
+['Shrek','a','🧅🐴🏰','Proprietário só quer sossego e acaba resgatando uma princesa para reaver o terreno.','Ogros são como cebolas.','shrek'],
+['Frozen','a','❄️👭⛄','Rainha se demite e constrói um palácio para não falar com ninguém.','','frozen'],
+['Wall-E','a','🤖🌱🚀','Faxineiro solitário segue uma planta até o espaço.','','walle'],
+['Divertida Mente','a','😀😢🧠','Cinco colegas de trabalho brigam dentro da cabeça de uma menina de 11 anos.','',''],
+['Ratatouille','a','🐀👨‍🍳🍲','Cozinheiro sem talento é pilotado pelo cabelo.','',''],
+['Monstros S.A.','a','👁️🚪😱','Empresa de energia descobre que riso rende mais que susto.','',''],
+['A Viagem de Chihiro','a','🐷♨️🐉','Menina arruma emprego numa casa de banhos depois que os pais comem demais.','',''],
+['Os Incríveis','a','🦸👪🧥','Família esconde os talentos por ordem judicial.','Nada de capas!',''],
+['Moana','a','🌊⛵🐓','Filha do chefe devolve uma pedra com a ajuda de um semideus tatuado.','',''],
+['Viva: A Vida é uma Festa','a','🎸💀🌼','Menino atravessa para o outro lado para provar que pode tocar violão.','',''],
+['Breaking Bad','s','🧪🚐🍕','Professor de química encontra um jeito de pagar o tratamento.','Eu sou o perigo.','bb'],
+['Stranger Things','s','🚲🔦🧇','Crianças perdem um amigo e ganham uma amiga que adora waffle.','','st'],
+['Friends','s','☕🛋️🦞','Seis adultos moram em apartamentos que nenhum deles poderia pagar.','A gente estava dando um tempo!','friends'],
+['Game of Thrones','s','❄️🐉🪑','Famílias disputam uma cadeira desconfortável enquanto o inverno não chega.','O inverno está chegando.','got'],
+['Round 6','s','🦑🍪🔺','Endividados voltam a brincar como crianças por um prêmio em dinheiro.','Batatinha frita, um, dois, três.','round6'],
+['The Office','s','📎🏢📄','Documentário sobre uma empresa de papel dura mais que o interesse por papel.','Foi o que ela disse.','office'],
+['La Casa de Papel','s','🎭💶🏦','Professor dá aula para alunos com nomes de cidades.','',''],
+['Dark','s','🕳️⏳☔','Numa cidade pequena, todo mundo é parente de todo mundo, em vários anos.','',''],
+['Peaky Blinders','s','🧢🥃🐎','Família de Birmingham resolve os negócios de boina.','',''],
+['Grey\'s Anatomy','s','🩺💔🚁','Médicos operam pouco e sofrem muito num hospital de Seattle.','',''],
+['Wandinha','s','🖐️🎻🖤','Adolescente de tranças muda de escola e leva uma mão de estimação.','',''],
+['The Last of Us','s','🍄🔦🦒','Contrabandista atravessa o país com uma menina que conta piadas ruins.','',''],
+['Black Mirror','s','📱🪞🐷','Cada episódio dá um motivo novo para desligar o celular.','',''],
+['How I Met Your Mother','s','☂️🍺🎺','Pai leva nove temporadas para responder a uma pergunta simples.','',''],
+['Bridgerton','s','🐝💃✉️','Uma autora anônima publica a fofoca da temporada.','',''],
+['Chaves','s','🛢️🥪🏘️','Menino mora num barril e sonha com sanduíche de presunto.','Foi sem querer querendo.','']
+];
+var KIND = { f: 'Filme', a: 'Animação', s: 'Série' };
+var MODE = { cena: 'Cena', fala: 'Fala', emoji: 'Emoji', sinopse: 'Sinopse torta' };
+var S, N, tick = null, ox = 50, oy = 50;
+
+function stop() { if (tick) { clearInterval(tick); tick = null; } }
+function pts() { document.getElementById('pts').innerHTML = S && S.sc ? '<b>' + S.sc[0] + '</b> · <b>' + S.sc[1] + '</b>' : ''; }
+function types(t) { var a = ['emoji', 'sinopse']; if (t[4]) a.push('fala'); if (t[5]) a.push('cena'); return a; }
+function clue(t, type, cls) {
+  if (type === 'cena') return '<div class="scene ' + (cls || '') + '" id="sc"><svg viewBox="0 0 320 180" style="-webkit-transform-origin:' + ox + '% ' + oy + '%;transform-origin:' + ox + '% ' + oy + '%">' + SV[t[5]] + '</svg></div>';
+  if (type === 'fala') return '<p class="q">“' + JG.esc(t[4]) + '”</p>';
+  if (type === 'emoji') return '<div class="emo">' + t[2] + '</div>';
+  return '<p class="q">' + JG.esc(t[3]) + '</p>';
+}
+function tog(obj, k) { obj[k] = !obj[k]; var any = false; for (var x in obj) if (obj[x]) any = true; if (!any) obj[k] = true; }
+
+function menu() {
+  stop(); S = { kinds: { f: true, a: true, s: true }, modes: { cena: true, fala: true, emoji: true, sinopse: true }, total: 12 }; pts();
+  (function draw() {
+    var row = function (map, sel, act) {
+      var h = ''; for (var k in map) h += '<button class="btn sm' + (sel[k] ? ' on' : '') + '" data-act="' + act + '" data-v="' + k + '">' + map[k] + '</button>';
+      return '<div class="wrap">' + h + '</div>';
+    };
+    JG.view('<h1>Fotograma</h1><p class="mut">A pista aparece e vai perdendo valor. Quem souber aperta o próprio nome e responde em voz alta. Errar custa um ponto.</p>' +
+      '<p class="kick">Entra no jogo</p>' + row(KIND, S.kinds, 'k') + '<p class="kick">Tipos de pista</p>' + row(MODE, S.modes, 'm') +
+      '<p class="kick">Rodadas</p><div class="row">' + [8, 12, 20].map(function (n) {
+        return '<button class="btn sm' + (S.total === n ? ' on' : '') + '" data-act="t" data-v="' + n + '">' + n + '</button>';
+      }).join('') + '</div><button class="btn primary" data-act="go">Luz, câmera</button>', {
+      k: function (el) { tog(S.kinds, el.getAttribute('data-v')); draw(); },
+      m: function (el) { tog(S.modes, el.getAttribute('data-v')); draw(); },
+      t: function (el) { S.total = +el.getAttribute('data-v'); draw(); },
+      go: begin
+    });
+  })();
+}
+function begin() {
+  var seen = JG.store('jg_foto_seen') || [], list = T.filter(function (t) { return S.kinds[t[1]]; });
+  var fresh = list.filter(function (t) { return seen.indexOf(t[0]) < 0; });
+  if (fresh.length < S.total) { seen = []; fresh = list; }
+  S.r = [];
+  JG.shuffle(fresh).forEach(function (t) {
+    if (S.r.length >= S.total) return;
+    var ok = types(t).filter(function (x) { return S.modes[x]; });
+    if (!ok.length) return;
+    /* A cena pesa mais no sorteio: é a pista mais gostosa de adivinhar. */
+    var bag = ok.concat(ok.indexOf('cena') >= 0 ? ['cena', 'cena', 'cena'] : []);
+    S.r.push({ t: t, type: JG.pick(bag) });
+  });
+  JG.store('jg_foto_seen', seen.concat(S.r.map(function (r) { return r.t[0]; })));
+  S.i = 0; S.sc = [0, 0]; pts(); round();
+}
+function head(r) { return '<p class="kick">' + (S.i + 1) + ' de ' + S.r.length + ' · ' + KIND[r.t[1]] + ' · ' + MODE[r.type] + '</p>'; }
+function round() {
+  stop();
+  if (S.i >= S.r.length) return end();
+  var r = S.r[S.i]; r.pts = 5; ox = 20 + Math.floor(Math.random() * 60); oy = 25 + Math.floor(Math.random() * 50);
+  JG.view(head(r) + clue(r.t, r.type) + '<div id="extra"></div><p><span class="val">Vale <b id="val">5</b></span></p>' +
+    '<div class="row"><button class="btn primary" data-act="b" data-v="0">' + JG.esc(N[0]) + ' sabe</button><button class="btn primary" data-act="b" data-v="1">' + JG.esc(N[1]) + ' sabe</button></div>' +
+    '<div class="row"><button class="btn ghost sm" data-act="dica">Dica extra</button><button class="btn ghost sm" data-act="nin">Ninguém sabe</button></div>', {
+    b: function (el) { buzz(r, +el.getAttribute('data-v')); },
+    dica: function (el) {
+      var other = types(r.t).filter(function (x) { return x !== r.type && x !== 'cena'; })[0];
+      document.getElementById('extra').innerHTML = clue(r.t, other);
+      r.pts = Math.min(r.pts, 2); document.getElementById('val').textContent = r.pts; el.disabled = true;
+    },
+    nin: function () { answer(r, -1); }
+  });
+  setTimeout(function () { var sc = document.getElementById('sc'); if (sc) sc.className = 'scene go'; }, 80);
+  tick = setInterval(function () {
+    var v = document.getElementById('val'); if (!v) return stop();
+    if (r.pts > 1) { r.pts--; v.textContent = r.pts; }
+  }, 4500);
+}
+function buzz(r, who) {
+  stop();
+  JG.view(head(r) + clue(r.t, r.type, 'full') + '<h2><span class="acc">' + JG.esc(N[who]) + '</span> responde em voz alta</h2>' +
+    '<button class="btn primary" data-act="v">Ver a resposta</button>', { v: function () { answer(r, who); } });
+}
+function answer(r, who) {
+  stop();
+  var h = head(r) + (r.type === 'cena' ? clue(r.t, 'cena', 'full') : '') + '<h1>' + JG.esc(r.t[0]) + '</h1><p class="mut">' + JG.esc(r.t[3]) + '</p>';
+  var go = function (d) { if (who >= 0) S.sc[who] += d; S.i++; pts(); round(); };
+  if (who < 0) return JG.view(h + '<button class="btn primary" data-act="n">Próxima</button>', { n: function () { go(0); } });
+  JG.view(h + '<div class="row"><button class="btn primary" data-act="y">Acertou, +' + r.pts + '</button><button class="btn" data-act="x">Errou, −1</button></div>', {
+    y: function () { go(r.pts); }, x: function () { go(-1); }
+  });
+}
+function end() {
+  var w = S.sc[0] === S.sc[1] ? -1 : S.sc[0] > S.sc[1] ? 0 : 1;
+  JG.view('<p class="kick">Créditos finais</p><h2>' + (w < 0 ? 'Empate técnico.' : JG.esc(N[w]) + ' leva a estatueta.') + '</h2>' +
+    '<div class="vs"><div><div class="who">' + JG.esc(N[0]) + '</div><div class="big">' + S.sc[0] + '</div></div><div><div class="who">' + JG.esc(N[1]) +
+    '</div><div class="big">' + S.sc[1] + '</div></div></div><p class="mut">' + (w < 0 ? 'O filme de hoje se decide no par ou ímpar.' : 'Quem perdeu escolhe o filme de hoje. Prêmio de consolação.') +
+    '</p><button class="btn primary" data-act="a">Outra sessão</button><a class="btn ghost" href="../">Outros jogos</a>', { a: menu });
+}
+
+JG.needNames(function (n) { N = n; menu(); });
+})();
+</script>
+</body>
+</html>
