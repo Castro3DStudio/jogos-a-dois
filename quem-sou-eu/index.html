@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0d0a14">
+<title>Quem Sou Eu</title>
+<link rel="stylesheet" href="../assets/base.css">
+<style>
+:root{--acc:#f0a63c;--acc-ink:#1d1204;--glow:rgba(240,166,60,.17)}
+.screen.board{max-width:44rem;padding-left:.6rem;padding-right:.6rem}
+.code{font-size:3.4rem;letter-spacing:.4rem;font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;color:var(--acc);margin:.4rem 0}
+.grid{display:flex;flex-wrap:wrap;margin:.4rem -.2rem}
+.t{position:relative;width:calc(25% - .4rem);margin:.2rem;padding:0;border:1px solid var(--line);border-radius:.7rem;background:var(--bg2);color:var(--ink);
+  font:inherit;cursor:pointer;overflow:hidden;-webkit-appearance:none;appearance:none;text-align:center;transition:opacity .2s}
+@media(min-width:560px){.t{width:calc(16.666% - .4rem)}}
+.t .ph{display:block;width:100%;padding-top:110%;background:#0a0810 center 18%/cover no-repeat;position:relative}
+.t .em{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;font-size:2rem}
+.t .nm{display:block;font-size:.66rem;line-height:1.15;padding:.3rem .2rem .35rem;min-height:2.1rem;font-weight:600}
+.t .fm{display:block;font-size:.56rem;color:var(--mut);font-weight:400;margin-top:.1rem}
+.t.down{opacity:.16}
+.t.down:after{content:"";position:absolute;left:10%;right:10%;top:50%;height:2px;background:var(--ink);transform:rotate(-35deg)}
+.t.aim{border-color:var(--acc)}
+.chute .t{box-shadow:0 0 0 1px var(--acc)}
+.me{display:flex;align-items:center;background:var(--bg2);border:1px solid var(--acc);border-radius:1rem;padding:.45rem;margin:.2rem 0 .5rem;text-align:left}
+.me .ph{flex:0 0 3.4rem;height:3.4rem;border-radius:.6rem;background:#0a0810 center 18%/cover no-repeat;position:relative;margin-right:.7rem;overflow:hidden}
+.me .ph .em{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;font-size:1.8rem}
+.me b{display:block;font-size:1.05rem}
+.me small{color:var(--mut);font-size:.75rem}
+.me .hid{filter:blur(9px)}
+.me button{margin-left:auto;flex:0 0 auto;width:auto}
+.bar2{display:flex;margin:.2rem -.25rem 0}
+.bar2 .btn{flex:1 1 0;margin:.25rem}
+.big2{font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;font-size:2.6rem;line-height:1.1;margin:.4rem 0;color:var(--acc)}
+.hero{width:11rem;height:12rem;margin:.6rem auto;border-radius:1rem;background:#0a0810 center 18%/cover no-repeat;position:relative;border:1px solid var(--line)}
+.hero .em{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;font-size:5rem}
+.testa{font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;font-size:3rem;line-height:1.1;margin:1rem 0 .3rem}
+.clock{font-size:2.4rem;font-variant-numeric:tabular-nums;font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;color:var(--acc)}
+.cred{font-size:.68rem;color:var(--mut);margin-top:1.2rem}
+.cred a{color:var(--mut)}
+</style>
+</head>
+<body>
+<header class="top"><a href="../">‹ Jogos</a><span class="brand">Quem Sou Eu</span><span class="pts" id="pts"></span></header>
+<main id="app"></main>
+<script src="../assets/app.js"></script>
+<script>
+(function () {
+'use strict';
+/* Atores: [nome, caminho da foto no Wikimedia Commons]. */
+var FOTO="https://upload.wikimedia.org/wikipedia/commons/thumb/";
+var ATORES=[["Tom Hanks", "3/39/TomHanksPrincEdw031223_%2811_of_41%29_%28cropped%29.jpg/250px-TomHanksPrincEdw031223_%2811_of_41%29_%28cropped%29.jpg"],["Leonardo DiCaprio", "2/2d/LeoPTABFI191125-28_%28cropped%29.jpg/250px-LeoPTABFI191125-28_%28cropped%29.jpg"],["Brad Pitt", "9/90/Brad_Pitt-69858.jpg/250px-Brad_Pitt-69858.jpg"],["Johnny Depp", "2/21/Johnny_Depp_2020.jpg/250px-Johnny_Depp_2020.jpg"],["Tom Cruise", "2/23/Tom_Cruise_at_53rd_Saturn_Awards_2026-01.jpg/250px-Tom_Cruise_at_53rd_Saturn_Awards_2026-01.jpg"],["Will Smith", "5/55/TechCrunch_Disrupt_San_Francisco_2019_-_Day_1_%2848834070763%29_%28cropped%29.jpg/250px-TechCrunch_Disrupt_San_Francisco_2019_-_Day_1_%2848834070763%29_%28cropped%29.jpg"],["Denzel Washington", "c/cc/Denzel_Washington_at_the_2025_Cannes_Film_Festival.jpg/250px-Denzel_Washington_at_the_2025_Cannes_Film_Festival.jpg"],["Morgan Freeman", "4/42/Morgan_Freeman_at_The_Pentagon_on_2_August_2023_-_230802-D-PM193-3363_%28cropped%29.jpg/250px-Morgan_Freeman_at_The_Pentagon_on_2_August_2023_-_230802-D-PM193-3363_%28cropped%29.jpg"],["Robert Downey Jr.", "a/a9/RobertDowneyJr-byPhilipRomano7_%28cropped%29.jpg/250px-RobertDowneyJr-byPhilipRomano7_%28cropped%29.jpg"],["Scarlett Johansson", "a/ad/Scarlett_Johansson-8588.jpg/250px-Scarlett_Johansson-8588.jpg"],["Angelina Jolie", "1/12/Angelina_Jolie-643531_%28cropped%29.jpg/250px-Angelina_Jolie-643531_%28cropped%29.jpg"],["Jennifer Lawrence", "0/01/Jennifer_Lawrence%2C_Cannes_Film_Festival_2025.jpg/250px-Jennifer_Lawrence%2C_Cannes_Film_Festival_2025.jpg"],["Margot Robbie", "9/90/Margot_Robbie_Wuthering_Heights_premiere_%28cropped%29.jpg/250px-Margot_Robbie_Wuthering_Heights_premiere_%28cropped%29.jpg"],["Emma Stone", "2/23/Emma_Stone_at_the_2025_Venice_Film_Festival-6313_%28cropped%29.jpg/250px-Emma_Stone_at_the_2025_Venice_Film_Festival-6313_%28cropped%29.jpg"],["Meryl Streep", "e/e5/Meryl_Streep-_Press_conference_for_the_film_%22The_Devil_Wears_Prada_2%22_-_55194765350_%28cropped1%29.jpg/250px-Meryl_Streep-_Press_conference_for_the_film_%22The_Devil_Wears_Prada_2%22_-_55194765350_%28cropped1%29.jpg"],["Julia Roberts", "d/d3/Julia_Roberts_2025.jpg/250px-Julia_Roberts_2025.jpg"],["Sandra Bullock", "7/74/Sandra_Bullock_at_The_Egyptian_Theatre_2024.jpg/250px-Sandra_Bullock_at_The_Egyptian_Theatre_2024.jpg"],["Nicole Kidman", "9/9e/MKr384262_Nicole_Kidman_%28Women_In_Motion%2C_Cannes_2025%29.jpg/250px-MKr384262_Nicole_Kidman_%28Women_In_Motion%2C_Cannes_2025%29.jpg"],["Keanu Reeves", "b/b4/Keanu_Reeves_at_TIFF_2025_02_%28Cropped%29.jpg/250px-Keanu_Reeves_at_TIFF_2025_02_%28Cropped%29.jpg"],["Dwayne Johnson", "7/7e/Dwayne_Johnson-1764_%284x5_cropped_with_moderate_headroom%29.jpg/250px-Dwayne_Johnson-1764_%284x5_cropped_with_moderate_headroom%29.jpg"],["Vin Diesel", "8/83/Vin_Diesel_by_Gage_Skidmore_2.jpg/250px-Vin_Diesel_by_Gage_Skidmore_2.jpg"],["Chris Hemsworth", "8/86/Chris_Hemsworth_-_Crime_101.jpg/250px-Chris_Hemsworth_-_Crime_101.jpg"],["Chris Evans", "d/d5/Chris_Evans_at_the_2025_Toronto_International_Film_Festival_%28cropped%29.jpg/250px-Chris_Evans_at_the_2025_Toronto_International_Film_Festival_%28cropped%29.jpg"],["Chris Pratt", "b/bf/Chris_Pratt_Jurassic_World_Fallen_Kingdom_Japan_Premiere_Red_Carpet_%283x4_cropped%29.jpg/250px-Chris_Pratt_Jurassic_World_Fallen_Kingdom_Japan_Premiere_Red_Carpet_%283x4_cropped%29.jpg"],["Ryan Reynolds", "1/14/Deadpool_2_Japan_Premiere_Red_Carpet_Ryan_Reynolds_%28cropped%29.jpg/250px-Deadpool_2_Japan_Premiere_Red_Carpet_Ryan_Reynolds_%28cropped%29.jpg"],["Ryan Gosling", "6/62/GoslingBFI081223_%2822_of_30%29_%2853388157347%29_%28cropped%29.jpg/250px-GoslingBFI081223_%2822_of_30%29_%2853388157347%29_%28cropped%29.jpg"],["Hugh Jackman", "d/d8/Hugh_Jackman_Is_This_Thing_On-68_%28cropped%29.jpg/250px-Hugh_Jackman_Is_This_Thing_On-68_%28cropped%29.jpg"],["Matt Damon", "f/f9/MattDamon-byPhilipRomano2.jpg/250px-MattDamon-byPhilipRomano2.jpg"],["Ben Affleck", "3/34/Ben_Affleck_at_83rd_Venice_International_Film_Festival-1_%28cropped%29.jpg/250px-Ben_Affleck_at_83rd_Venice_International_Film_Festival-1_%28cropped%29.jpg"],["Christian Bale", "0/0a/Christian_Bale-7837.jpg/250px-Christian_Bale-7837.jpg"],["Samuel L. Jackson", "2/29/SamuelLJackson.jpg/250px-SamuelLJackson.jpg"],["Harrison Ford", "8/81/Harrison_Ford_-_Televerse_2025-03.jpg/250px-Harrison_Ford_-_Televerse_2025-03.jpg"],["Arnold Schwarzenegger", "e/e3/Arnold_Schwarzenegger_-_Austrian_World_Summit_2026_BHO-2906.jpg/250px-Arnold_Schwarzenegger_-_Austrian_World_Summit_2026_BHO-2906.jpg"],["Sylvester Stallone", "1/12/P20251206DT-0472_%283x4_cropped_on_Stallone_with_moderate_headroom%29.jpg/250px-P20251206DT-0472_%283x4_cropped_on_Stallone_with_moderate_headroom%29.jpg"],["Jim Carrey", "b/b5/Jim_Carrey_in_2020.png/250px-Jim_Carrey_in_2020.png"],["Adam Sandler", "1/1f/Jackie_Sandler_Adam_Sandler_Jay_Kelly-36_%283x4%29.jpg/250px-Jackie_Sandler_Adam_Sandler_Jay_Kelly-36_%283x4%29.jpg"],["Zendaya", "5/5a/Zendaya-byPhilipRomano.jpg/250px-Zendaya-byPhilipRomano.jpg"],["Tom Holland", "1/18/TomHolland-byPhilipRomano.jpg/250px-TomHolland-byPhilipRomano.jpg"],["Timothée Chalamet", "5/5c/Timoth%C3%A9e_Chalamet-63482_%28cropped%29.jpg/250px-Timoth%C3%A9e_Chalamet-63482_%28cropped%29.jpg"],["Anne Hathaway", "a/a5/AnneHathaway-byPhilipRomano-Crop.jpg/250px-AnneHathaway-byPhilipRomano-Crop.jpg"],["Natalie Portman", "f/f9/NataliePortman.jpg/250px-NataliePortman.jpg"],["Gal Gadot", "3/38/Gal_Gadot_by_Gage_Skidmore_3.jpg/250px-Gal_Gadot_by_Gage_Skidmore_3.jpg"],["Emma Watson", "7/7f/Emma_Watson_2013.jpg/250px-Emma_Watson_2013.jpg"],["Daniel Radcliffe", "1/12/DanielRadcliffe.jpg/250px-DanielRadcliffe.jpg"],["Cameron Diaz", "9/99/Cameron_Diaz_at_WWD_Style_Awards_2026-1998.jpg/250px-Cameron_Diaz_at_WWD_Style_Awards_2026-1998.jpg"],["Jason Statham", "d/d3/Jason_Statham_2018.jpg/250px-Jason_Statham_2018.jpg"],["Keira Knightley", "f/f1/Keira_Knightley_in_The_Aftermath_05.jpg/250px-Keira_Knightley_in_The_Aftermath_05.jpg"],["Zoe Saldaña", "e/e1/Zoe_Salda%C3%B1a_at_the_2024_Toronto_International_Film_Festival_%28cropped%29.jpg/250px-Zoe_Salda%C3%B1a_at_the_2024_Toronto_International_Film_Festival_%28cropped%29.jpg"],["Jennifer Aniston", "1/16/JenniferAnistonHWoFFeb2012.jpg/250px-JenniferAnistonHWoFFeb2012.jpg"],["Mark Wahlberg", "2/26/Mark_Wahlberg_2021.jpg/250px-Mark_Wahlberg_2021.jpg"],["Eddie Murphy", "5/5f/Eddie_Murphy_by_David_Shankbone.jpg/250px-Eddie_Murphy_by_David_Shankbone.jpg"],["Pedro Pascal", "5/56/Pedro_Pascal_at_the_2026_New_York_Film_Festival-042.jpg/250px-Pedro_Pascal_at_the_2026_New_York_Film_Festival-042.jpg"],["Robert Pattinson", "d/d6/Robert_Pattinson_Venice_Film_Festival_%28cropped%29.jpg/250px-Robert_Pattinson_Venice_Film_Festival_%28cropped%29.jpg"],["Kristen Stewart", "3/3b/Kristen_Stewart_at_WWD_Style_Awards_2026.jpg/250px-Kristen_Stewart_at_WWD_Style_Awards_2026.jpg"],["Al Pacino", "5/5b/Al_Pacino_-_Killing_Castro_-_Q%26A_-_Tribeca_2026_-_by_%40JJxFile-23_%28cropped%29.jpg/250px-Al_Pacino_-_Killing_Castro_-_Q%26A_-_Tribeca_2026_-_by_%40JJxFile-23_%28cropped%29.jpg"],["Robert De Niro", "c/c1/Robert_de_Niro_Cannes_Film_Festival_%283x4_cropped%29.jpg/250px-Robert_de_Niro_Cannes_Film_Festival_%283x4_cropped%29.jpg"],["Anthony Hopkins", "6/63/Anthony_Hopkins_Red_Sea_Festival_2025_Portrait_%28cropped%29.jpg/250px-Anthony_Hopkins_Red_Sea_Festival_2025_Portrait_%28cropped%29.jpg"],["Viola Davis", "7/75/Viola_Davis_2026_%28cropped%29.jpg/250px-Viola_Davis_2026_%28cropped%29.jpg"],["Halle Berry", "a/aa/Halle_Berry-1910.jpg/250px-Halle_Berry-1910.jpg"],["Jackie Chan", "3/35/Jackie_Chan.jpg/250px-Jackie_Chan.jpg"],["Cate Blanchett", "2/2a/Cate_Blanchett-63298_%28cropped_2%29.jpg/250px-Cate_Blanchett-63298_%28cropped_2%29.jpg"],["Charlize Theron", "7/73/CharlizeTheron-byPhilipRomano2.jpg/250px-CharlizeTheron-byPhilipRomano2.jpg"],["Jack Black", "9/92/TenaciousDO2160623_%2838_of_62%29_Jack_Black.jpg/250px-TenaciousDO2160623_%2838_of_62%29_Jack_Black.jpg"],["Megan Fox", "a/a8/Megan_Fox_-_Jennifer%27s_Body.jpg/250px-Megan_Fox_-_Jennifer%27s_Body.jpg"]];
+/* Personagens: [nome, filme ou série, emoji]. Sem foto: as imagens deles não têm licença livre. */
+var FILMES = [
+['Jack Sparrow', 'Piratas do Caribe', '🏴‍☠️'], ['Harry Potter', 'Harry Potter', '⚡'], ['Hermione Granger', 'Harry Potter', '📚'], ['Voldemort', 'Harry Potter', '🐍'],
+['Dumbledore', 'Harry Potter', '🧙'], ['Darth Vader', 'Star Wars', '🌑'], ['Luke Skywalker', 'Star Wars', '🌅'], ['Yoda', 'Star Wars', '🟢'],
+['Han Solo', 'Star Wars', '🛸'], ['Homem de Ferro', 'Vingadores', '🦾'], ['Capitão América', 'Vingadores', '🛡️'], ['Thor', 'Vingadores', '🔨'],
+['Hulk', 'Vingadores', '💚'], ['Thanos', 'Vingadores', '🧤'], ['Homem-Aranha', 'Marvel', '🕷️'], ['Pantera Negra', 'Marvel', '🐾'],
+['Groot', 'Guardiões da Galáxia', '🌳'], ['Deadpool', 'Deadpool', '❌'], ['Batman', 'DC', '🦇'], ['Coringa', 'DC', '🃏'],
+['Mulher-Maravilha', 'DC', '⭐'], ['Superman', 'DC', '🦸'], ['Wolverine', 'X-Men', '🐺'], ['Indiana Jones', 'Indiana Jones', '🗿'],
+['James Bond', '007', '🍸'], ['Neo', 'Matrix', '🕶️'], ['Forrest Gump', 'Forrest Gump', '🏃'], ['Rocky Balboa', 'Rocky', '🥊'],
+['Exterminador do Futuro', 'O Exterminador do Futuro', '⚙️'], ['Gandalf', 'O Senhor dos Anéis', '🧙‍♂️'], ['Frodo', 'O Senhor dos Anéis', '🏔️'], ['Gollum', 'O Senhor dos Anéis', '💍'],
+['Shrek', 'Shrek', '🧅'], ['Buzz Lightyear', 'Toy Story', '🚀'], ['Woody', 'Toy Story', '🤠'], ['Elsa', 'Frozen', '❄️'],
+['Simba', 'O Rei Leão', '🦁'], ['Jack Dawson', 'Titanic', '🚢'], ['Don Corleone', 'O Poderoso Chefão', '🕴️'], ['Hannibal Lecter', 'O Silêncio dos Inocentes', '🍷'],
+['Marty McFly', 'De Volta para o Futuro', '🛹'], ['Doc Brown', 'De Volta para o Futuro', '⏰'], ['E.T.', 'E.T.', '👽'], ['John Wick', 'John Wick', '🐶'],
+['Dominic Toretto', 'Velozes e Furiosos', '🏎️'], ['Katniss Everdeen', 'Jogos Vorazes', '🏹'], ['Barbie', 'Barbie', '💖'], ['Jake Sully', 'Avatar', '🔵'],
+['Ethan Hunt', 'Missão: Impossível', '💣'], ['Optimus Prime', 'Transformers', '🚛'], ['King Kong', 'King Kong', '🦍'], ['Gru', 'Meu Malvado Favorito', '🍌'],
+['Edward Cullen', 'Crepúsculo', '🧛'], ['Willy Wonka', 'A Fantástica Fábrica de Chocolate', '🍫'], ['Rambo', 'Rambo', '🎖️'], ['Maverick', 'Top Gun', '✈️']
+];
+var SERIES = [
+['Walter White', 'Breaking Bad', '🧪'], ['Jesse Pinkman', 'Breaking Bad', '🧢'], ['Eleven', 'Stranger Things', '🧇'], ['Hopper', 'Stranger Things', '🚔'],
+['Steve Harrington', 'Stranger Things', '🏏'], ['Jon Snow', 'Game of Thrones', '🐺'], ['Daenerys', 'Game of Thrones', '🐉'], ['Tyrion', 'Game of Thrones', '🍷'],
+['Arya Stark', 'Game of Thrones', '🗡️'], ['Cersei', 'Game of Thrones', '👑'], ['Ross', 'Friends', '🦕'], ['Rachel', 'Friends', '☕'],
+['Joey', 'Friends', '🍕'], ['Chandler', 'Friends', '😏'], ['Monica', 'Friends', '🧽'], ['Phoebe', 'Friends', '🎸'],
+['Sheldon Cooper', 'The Big Bang Theory', '🔬'], ['Michael Scott', 'The Office', '📎'], ['Dexter', 'Dexter', '🩸'], ['Wandinha', 'Wandinha', '🖤'],
+['Rick Grimes', 'The Walking Dead', '🧟'], ['Daryl', 'The Walking Dead', '🏹'], ['Negan', 'The Walking Dead', '⚾'], ['Joel', 'The Last of Us', '🍄'],
+['Ellie', 'The Last of Us', '🎒'], ['Homer Simpson', 'Os Simpsons', '🍩'], ['Bart Simpson', 'Os Simpsons', '🛹'], ['Rick Sanchez', 'Rick and Morty', '🌀'],
+['Peter Griffin', 'Family Guy', '🍺'], ['Dr. House', 'House', '💊'], ['Barney Stinson', 'How I Met Your Mother', '👔'], ['Ted Mosby', 'How I Met Your Mother', '☂️'],
+['Mandaloriano', 'The Mandalorian', '🪖'], ['Grogu', 'The Mandalorian', '🐸'], ['Tony Soprano', 'Família Soprano', '🍝'], ['Bob Esponja', 'Bob Esponja', '🍍'],
+['Thomas Shelby', 'Peaky Blinders', '🎩'], ['Sherlock', 'Sherlock', '🔍'], ['Geralt', 'The Witcher', '⚔️'], ['Lucifer', 'Lucifer', '😈'],
+['Carrie Bradshaw', 'Sex and the City', '👠'], ['Don Draper', 'Mad Men', '🥃'], ['Kendall Roy', 'Succession', '💼'], ['Meredith Grey', "Grey's Anatomy", '🩺']
+];
+var TEMAS = [
+{ n: 'Atores de Hollywood', d: 'Rosto famoso, com foto', l: function () { return ATORES.map(function (a) { return { n: a[0], f: a[1] ? FOTO + a[1] : '', e: '' }; }); } },
+{ n: 'Personagens de filmes', d: 'Blockbusters, heróis e vilões', l: function () { return FILMES.map(function (a) { return { n: a[0], s: a[1], e: a[2] }; }); } },
+{ n: 'Personagens de séries', d: 'As séries que todo mundo viu', l: function () { return SERIES.map(function (a) { return { n: a[0], s: a[1], e: a[2] }; }); } }
+];
+var N = 24, S = null;
+
+function esc(s) { return JG.esc(s); }
+function ph(p, cls) {
+  return '<span class="ph' + (cls ? ' ' + cls : '') + '"' + (p.f ? ' style="background-image:url(\'' + p.f + '\')"' : '') + '>' + (p.f ? '' : '<span class="em">' + (p.e || esc(p.n.charAt(0))) + '</span>') + '</span>';
+}
+function pts(t) { document.getElementById('pts').innerHTML = t || ''; }
+
+function menu() {
+  S = null; pts();
+  var th = JG.store('qse_tema'); th = th === null ? 0 : th;
+  (function draw() {
+    JG.view('<h1>Quem Sou Eu</h1><p class="mut">Cara a cara: os dois veem o mesmo tabuleiro e cada um tem um personagem secreto. Perguntas de sim ou não até alguém descobrir.</p>' +
+      '<p class="kick">Tema</p>' + TEMAS.map(function (t, i) {
+        return '<button class="btn sm' + (th === i ? ' on' : '') + '" data-act="t" data-v="' + i + '">' + t.n + '<br><span class="mut small" style="font-weight:400">' + t.d + '</span></button>';
+      }).join('') +
+      '<p class="kick">Cara a cara · dois celulares</p><button class="btn primary" data-act="new">Abrir partida neste celular</button><button class="btn" data-act="join">Entrar com o código do outro</button>' +
+      '<p class="kick">Na testa · um celular</p><button class="btn" data-act="testa">Celular na testa, 60 segundos</button>' +
+      '<p class="cred">Fotos dos atores: Wikimedia Commons, com licenças livres. Créditos de cada foto na página do ator na Wikipédia.</p>', {
+      t: function (el) { th = +el.getAttribute('data-v'); JG.store('qse_tema', th); draw(); },
+      'new': function () { quem(function (me) { lobby('' + (100 + Math.floor(Math.random() * 900)) + th, me); }); },
+      join: function () {
+        JG.view('<p class="kick">Entrar</p><h2>Código que aparece no outro celular</h2><input class="input" id="cd" inputmode="numeric" maxlength="4" placeholder="0000" autocomplete="off">' +
+          '<p class="mut small" id="er"></p><button class="btn primary" data-act="ok">Entrar</button><button class="btn ghost sm" data-act="b">Voltar</button>', {
+          ok: function () {
+            var v = document.getElementById('cd').value.trim();
+            if (!/^\d{3}[0-2]$/.test(v)) { document.getElementById('er').textContent = 'São 4 números, iguais aos do outro celular.'; return; }
+            quem(function (me) { start(+v, 1, me); });
+          },
+          b: menu
+        });
+      },
+      testa: function () { testa(th); }
+    });
+  })();
+}
+function quem(done) {
+  JG.needNames(function (n) {
+    JG.view('<p class="kick">Este celular</p><h2>Quem está com ele?</h2><button class="btn" data-act="a">' + esc(n[0]) + '</button><button class="btn" data-act="b">' + esc(n[1]) + '</button>' +
+      '<button class="btn ghost sm" data-act="c">Trocar nomes</button>', {
+      a: function () { done(0); }, b: function () { done(1); },
+      c: function () { JG.needNames(function () { quem(done); }, true); }
+    });
+  });
+}
+function lobby(code, me) {
+  JG.view('<p class="kick">Partida aberta · ' + TEMAS[+code.charAt(3)].n + '</p><div class="code">' + code + '</div>' +
+    '<p class="mut">No outro celular: Quem Sou Eu, "Entrar com o código do outro", e digitar este número.</p>' +
+    '<button class="btn primary" data-act="go">Ver o tabuleiro</button>', { go: function () { start(+code, 0, me); } });
+}
+
+/* O código define tabuleiro e os dois segredos; cada celular sabe o segredo do outro só para conferir o chute. */
+function start(code, role, me) {
+  S = { code: code, th: code % 10, role: role, me: me, n: JG.names(), k: 1, w: [0, 0] };
+  partida();
+}
+function partida() {
+  var r = JG.rng(S.code * 97 + S.k * 7919);
+  S.b = JG.shuffle(TEMAS[S.th].l(), r).slice(0, N);
+  var a = Math.floor(r() * N), b = (a + 1 + Math.floor(r() * (N - 1))) % N;
+  S.sec = [a, b]; S.down = {}; S.chute = false; S.hide = false;
+  S.comeca = (S.k % 2 === 1) === (S.role === 0);
+  tab();
+}
+function tab() {
+  var mine = S.b[S.sec[S.role]], outro = esc(S.n[1 - S.me]), vivos = 0;
+  pts('Partida <b>' + S.k + '</b>');
+  var g = S.b.map(function (p, i) {
+    if (!S.down[i]) vivos++;
+    return '<button class="t' + (S.down[i] ? ' down' : '') + '" data-act="t" data-i="' + i + '">' + ph(p) + '<span class="nm">' + esc(p.n) + (p.s ? '<span class="fm">' + esc(p.s) + '</span>' : '') + '</span></button>';
+  }).join('');
+  JG.view('<div class="me">' + ph(mine, S.hide ? 'hid' : '') + '<div><small>Você é</small><b>' + (S.hide ? '•••' : esc(mine.n)) + '</b></div><button class="btn ghost sm" data-act="h">' + (S.hide ? 'Mostrar' : 'Esconder') + '</button></div>' +
+    (S.chute ? '<p class="acc"><b>Modo chute:</b> toque em quem você acha que ' + outro + ' é. Errou, perdeu.</p>' :
+      '<p class="mut small">' + (S.comeca ? 'Você começa' : outro + ' começa') + '. Uma pergunta de sim ou não por vez. Toque para derrubar. Restam <b style="color:var(--ink)">' + vivos + '</b>.</p>') +
+    '<div class="grid' + (S.chute ? ' chute' : '') + '">' + g + '</div>' +
+    '<div class="bar2">' + (S.chute ? '<button class="btn" data-act="c">Cancelar chute</button>' : '<button class="btn primary" data-act="c">Chutar</button>') +
+    '<button class="btn ghost sm" data-act="r">Levantar todos</button></div>', {
+    t: function (el) {
+      var i = +el.getAttribute('data-i');
+      if (S.chute) { confirma(i); return; }
+      S.down[i] = !S.down[i]; el.className = 't' + (S.down[i] ? ' down' : '');
+      var n = 0; for (var j = 0; j < N; j++) if (!S.down[j]) n++;
+      var p = document.querySelector('.mut.small b'); if (p) p.textContent = n;
+    },
+    h: function () { S.hide = !S.hide; tab(); },
+    c: function () { S.chute = !S.chute; tab(); },
+    r: function () { S.down = {}; tab(); }
+  }, { wide: true, back: menu });
+  var sc = document.querySelector('.screen'); if (sc) sc.className += ' board';
+}
+function confirma(i) {
+  var p = S.b[i], outro = esc(S.n[1 - S.me]);
+  JG.view('<p class="kick">Chute final</p><div class="hero"></div><h2>' + outro + ' é <span class="acc">' + esc(p.n) + '</span>?</h2>' +
+    '<p class="mut">Se errar, a partida é de ' + outro + '.</p><button class="btn primary" data-act="y">Sim, chutar</button><button class="btn" data-act="n">Voltar ao tabuleiro</button>', {
+    y: function () { fim(i === S.sec[1 - S.role], i); },
+    n: function () { S.chute = false; tab(); }
+  });
+  heroImg(p);
+}
+function heroImg(p) {
+  var h = document.querySelector('.hero'); if (!h) return;
+  if (p.f) { h.style.backgroundImage = "url('" + p.f + "')"; h.innerHTML = ''; } else h.innerHTML = '<span class="em">' + (p.e || esc(p.n.charAt(0))) + '</span>';
+}
+function fim(ok, i) {
+  var real = S.b[S.sec[1 - S.role]], outro = esc(S.n[1 - S.me]), eu = esc(S.n[S.me]);
+  if (ok) S.w[S.me]++; else S.w[1 - S.me]++;
+  JG.view('<p class="kick">' + (ok ? 'Acertou' : 'Errou') + '</p><div class="hero"></div><div class="big2">' + esc(real.n) + '</div>' +
+    '<h2>' + (ok ? 'Partida de ' + eu + '. Avise ' + outro + '.' : 'Não era ' + esc(S.b[i].n) + '. A partida é de ' + outro + '.') + '</h2>' +
+    '<div class="vs"><div><div class="who">' + eu + '</div><div class="big">' + S.w[S.me] + '</div></div><div><div class="who">' + outro + '</div><div class="big">' + S.w[1 - S.me] + '</div></div></div>' +
+    '<p class="mut small">Placar deste celular. Para a revanche, os dois apertam o botão abaixo.</p>' +
+    '<button class="btn primary" data-act="nx">Revanche · partida ' + (S.k + 1) + '</button><button class="btn" data-act="m">Voltar ao início</button>', {
+    nx: function () { S.k++; partida(); },
+    m: menu
+  });
+  heroImg(real);
+}
+
+/* ---------- Na testa: um celular, 60 segundos ---------- */
+function testa(th) {
+  var deck = JG.shuffle(TEMAS[th].l()), i = 0, ok = 0, pulou = [], t = 60, T = null;
+  JG.view('<p class="kick">Na testa · ' + TEMAS[th].n + '</p><h2>Quem segura o celular na testa não pode ver a tela</h2>' +
+    '<p class="mut">O outro dá dicas sem dizer o nome. Acertou, toque em "Acertou". Travou, "Passa". 60 segundos.</p><button class="btn primary" data-act="go">Começar</button><button class="btn ghost sm" data-act="b">Voltar</button>', {
+    go: function () { carta(); T = setInterval(tick, 1000); },
+    b: menu
+  });
+  function tick() {
+    t--; var c = document.getElementById('ck');
+    if (!c) { clearInterval(T); return; }
+    c.textContent = t;
+    if (t <= 0) { clearInterval(T); if (navigator.vibrate) navigator.vibrate([300, 100, 300]); fimT(); }
+  }
+  function carta() {
+    var p = deck[i % deck.length];
+    JG.view('<div class="clock" id="ck">' + t + '</div><div class="hero"></div><div class="testa">' + esc(p.n) + '</div>' + (p.s ? '<p class="mut">' + esc(p.s) + '</p>' : '') +
+      '<div class="row"><button class="btn" data-act="p">Passa</button><button class="btn primary" data-act="a">Acertou</button></div>', {
+      a: function () { ok++; i++; carta(); },
+      p: function () { pulou.push(p.n); i++; carta(); }
+    }, { back: function () { clearInterval(T); menu(); } });
+    heroImg(p);
+  }
+  function fimT() {
+    JG.view('<p class="kick">Tempo</p><div class="big acc">' + ok + '</div><h2>' + (ok === 1 ? 'acerto' : 'acertos') + '</h2>' +
+      (pulou.length ? '<p class="mut small">Passou: ' + esc(pulou.join(', ')) + '</p>' : '') +
+      '<button class="btn primary" data-act="g">Agora é o outro</button><button class="btn" data-act="m">Voltar ao início</button>', {
+      g: function () { testa(th); }, m: menu
+    });
+  }
+}
+
+menu();
+})();
+</script>
+</body>
+</html>
