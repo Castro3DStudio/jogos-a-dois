@@ -44,9 +44,10 @@ summary{cursor:pointer;color:var(--ink);padding:.4rem 0}
     { id: 'sintonia', n: 'Sintonia', c: '#e2b55a', d: 'Um responde em segredo, o outro tenta acertar. Com aposta.', i: '1 aparelho · 20 a 40 min' },
     { id: 'meia-luz', n: 'Meia-Luz', c: '#d4587c', d: 'Cartas, roleta e desafios para depois que a luz baixa.', i: '1 aparelho · só para dois' },
     { id: 'fotograma', n: 'Fotograma', c: '#56c2b2', d: 'Filme ou série por cena desenhada, fala, emoji e sinopse torta.', i: '1 aparelho · quem aperta primeiro' },
-    { id: 'dupla-chave', n: 'Dupla Chave', c: '#8b98f5', d: 'Cada um vê metade do enigma. Só sai conversando.', i: '2 aparelhos · cooperativo' }
+    { id: 'dupla-chave', n: 'Dupla Chave', c: '#8b98f5', d: 'Cada um vê metade do enigma. Só sai conversando.', i: '2 aparelhos · cooperativo' },
+    { id: 'tribunal', n: 'Tribunal do Desejo', c: '#c9474f', d: 'Um defende uma fantasia, o outro interroga. Veredito em segredo.', i: '2 celulares ou 1 · conversa' }
   ];
-  var ready = ['sintonia', 'meia-luz', 'fotograma', 'dupla-chave'];
+  var ready = ['sintonia', 'meia-luz', 'fotograma', 'dupla-chave', 'tribunal'];
   document.getElementById('tiles').innerHTML = G.map(function (g) {
     var on = ready.indexOf(g.id) >= 0;
     return '<a class="tile' + (on ? '' : ' soon') + '" style="--c:' + g.c + '" ' + (on ? 'href="' + g.id + '/"' : '') + '><b>' + g.n + '</b><span>' + g.d +

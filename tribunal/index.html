@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0d0a14">
+<title>Tribunal do Desejo</title>
+<link rel="stylesheet" href="../assets/base.css">
+<style>
+:root{--acc:#c9474f;--acc-ink:#fff;--glow:rgba(201,71,79,.2)}
+.code{font-size:3.4rem;letter-spacing:.4rem;font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;color:var(--acc);margin:.4rem 0}
+.role{display:inline-block;padding:.3rem .8rem;border-radius:2rem;border:1px solid var(--acc);color:var(--acc);font-size:.75rem;letter-spacing:.12em;text-transform:uppercase}
+.caso{font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;font-style:italic;color:var(--acc);font-size:1.7rem;margin:.6rem 0 .2rem;line-height:1.15}
+.rule{border:1px dashed var(--acc);border-radius:.8rem;padding:.6rem .8rem;font-size:.9rem;margin:.8rem 0;color:var(--mut);text-align:left}
+.rule b{color:var(--acc);font-weight:600}
+.qs{text-align:left;padding-left:1.2rem;margin:.6rem 0}
+.qs li{margin:.55rem 0;font-size:1.08rem}
+.clock{font-size:3.4rem;font-variant-numeric:tabular-nums;margin:.2rem 0;font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif}
+.clock.end{color:var(--acc)}
+.vt .btn small{display:block;font-weight:400;font-size:.75rem;color:var(--mut);margin-top:.15rem}
+.seal{font-size:2.6rem;font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;font-style:italic;color:var(--acc);margin:1.2rem 0}
+.autos{text-align:left;margin:.8rem 0;padding:0;list-style:none}
+.autos li{padding:.55rem 0;border-bottom:1px solid var(--line)}
+.autos li span{float:right;color:var(--mut);font-size:.85rem}
+.autos li.win{color:var(--acc)}
+</style>
+</head>
+<body>
+<header class="top"><a href="../">‹ Jogos</a><span class="brand">Tribunal do Desejo</span><span class="pts" id="pts"></span></header>
+<main id="app"></main>
+<script src="../assets/app.js"></script>
+<script>
+(function () {
+'use strict';
+/* Dois aparelhos sem rede: o mesmo código gera os mesmos casos nos dois; cada papel vê só a sua parte. {o} = nome de quem acusa. */
+var NIV = ['Morno', 'Quente', 'Sem filtro'];
+var CASOS = [[
+['O caso do banho', 'Tomar banho juntos sem pressa nenhuma, um lavando o outro inteiro, e ninguém pode apressar nada.'],
+['O caso da manhã', 'Num dia sem despertador, acordar o outro com beijos que vão descendo pelo corpo.'],
+['O caso do jantar', 'Sair para jantar sabendo que um de vocês está sem nada por baixo. Só os dois sabem.'],
+['O caso da carta', 'Escrever ao outro uma carta descrevendo a próxima noite em detalhes, para ser lida em voz alta.'],
+['O caso da dança', 'Dança lenta na sala, luz baixa. A cada música, uma peça de roupa a menos.'],
+['O caso da massagem', 'Massagem com óleo no corpo inteiro. Regra: quem recebe não pode tocar até o fim.'],
+['O caso do hotel', 'Uma noite de hotel só para isso: sem passeio, sem programa, sem sair do quarto.'],
+['O caso das mensagens', 'Um dia inteiro trocando mensagens cada vez mais quentes, até a hora de se encontrarem.'],
+['O caso da venda', 'Um de vocês de olhos vendados a noite toda, guiado só pela voz do outro.'],
+['O caso dos estranhos', 'Chegar separados num bar e paquerar como se fosse o primeiro encontro.'],
+['O caso do espelho', 'Transar de frente para um espelho, olhando um para o outro pelo reflexo.'],
+['O caso do fim de semana', 'Um fim de semana inteiro em casa, quase sem roupa, com os celulares desligados.'],
+['O caso do mirante', 'Estacionar num mirante à noite e nem chegar a descer do carro.'],
+['O caso da trilha', 'Montar juntos uma playlist só para transar, e testar faixa por faixa.']
+], [
+['O caso do controle', 'Uma noite inteira em que um manda e o outro só obedece. Na noite seguinte, revanche.'],
+['O caso das mãos presas', 'Prender as mãos de um com uma gravata ou um lenço. O outro faz o que quiser.'],
+['O caso do provador', 'Entrar juntos num provador de loja e sair levando mais do que uma roupa nova.'],
+['O caso da câmera', 'Gravar vocês dois, assistir juntos logo em seguida e apagar depois.'],
+['O caso do brinquedo', 'Escolher juntos um brinquedo novo e estrear na mesma noite.'],
+['O caso do silêncio', 'Transar num lugar onde não dá para fazer barulho nenhum. Quem fizer som perde.'],
+['O caso da varanda', 'Ao ar livre, na varanda ou no quintal, com o risco pequeno de alguém ver.'],
+['O caso da provocação', 'Um dia inteiro de provocação em público, com mãos e sussurros, e nada até chegar em casa.'],
+['O caso da escolha', 'Um escolhe a lingerie ou a cueca que o outro vai usar, e só se tira quando ele mandar.'],
+['O caso dos personagens', 'Encontro com nomes falsos e histórias inventadas. Só se reconhecem no fim.'],
+['O caso do quente e frio', 'Gelo e bebida quente no corpo, alternando, com quem recebe de olhos vendados.'],
+['O caso da inversão', 'Quem costuma conduzir passa a noite sendo conduzido, sem exceção.'],
+['O caso da madrugada', 'Acordar o outro no meio da noite sem dizer nada. Só começar.'],
+['O caso do áudio', 'Mandar ao outro, no meio do expediente, um áudio contando o que vai fazer à noite.']
+], [
+['O caso do limite', 'Uma noite em que um de vocês leva o outro ao fim quantas vezes conseguir, sem pressa.'],
+['O caso da espera', 'Levar o outro até quase o fim, parar, e repetir até ele pedir por favor.'],
+['O caso da narração', 'Transar narrando em voz alta, como se alguém estivesse assistindo.'],
+['O caso da casa toda', 'Passar por todos os cômodos da casa na mesma noite.'],
+['O caso do lugar proibido', 'Um lugar semipúblico: banheiro de restaurante, escada de prédio, carro no estacionamento.'],
+['O caso da entrega', 'Com palavra de segurança combinada, um entrega o controle total ao outro por uma noite.'],
+['O caso sem mãos', 'Uma noite inteira em que quem conduz não pode usar as mãos. Só a boca.'],
+['O caso da terceira pessoa', 'Imaginar em voz alta, durante, que há mais alguém no quarto. Só na conversa.'],
+['O caso da força', 'Puxão de cabelo, tapa e palavra suja, com mais força do que vocês costumam usar.'],
+['O caso das três posições', 'Três posições que vocês nunca fizeram, uma atrás da outra.'],
+['O caso do território novo', 'Experimentar sexo anal com calma, do jeito e no ritmo que quem recebe conduzir.'],
+['O caso do espetáculo', 'Um se toca na frente do outro, sem pressa. Quem assiste não pode encostar.'],
+['O caso da rapidinha', 'Uma rapidinha no meio de um compromisso, e voltar como se nada tivesse acontecido.'],
+['O caso da sessão a dois', 'Assistir pornô juntos. Cada um escolhe um vídeo e explica o que gostou nele.']
+]];
+var LIVRE = ['Petição livre', 'Neste caso, a defesa escolhe a fantasia. Pode ser uma que você nunca teve coragem de propor.'];
+var PROVAS = ['uma lembrança real de vocês dois', 'uma parte do corpo de {o} que você não esquece', 'um som', 'um cheiro ou um gosto',
+  'o que você sentiria nos primeiros cinco segundos', 'uma frase que {o} diria nessa hora', 'por que isso ainda não aconteceu',
+  'o que você daria a {o} em troca', 'o momento exato em que {o} perderia o controle'];
+var OBJ = ['<b>mais detalhe.</b> A defesa repete o último trecho, mais devagar e com mais detalhe.',
+  '<b>sussurro.</b> Daqui em diante, a defesa só fala sussurrando.',
+  '<b>olhos nos olhos.</b> A defesa continua sem desviar o olhar.',
+  '<b>tempo presente.</b> A defesa narra como se estivesse acontecendo agora.',
+  '<b>ponto fraco.</b> A defesa diz o que acha que você vai recusar, e por que não deveria.',
+  '<b>prova.</b> A defesa precisa citar algo que já aconteceu entre vocês.'];
+var PERG = ['Onde exatamente isso acontece? Descreva o lugar.', 'Quem toma a iniciativa, e como?', 'O que cada um está vestindo no começo?',
+  'Qual é o primeiro toque?', 'Que som você quer ouvir de mim?', 'O que você imagina que eu estou sentindo?',
+  'Qual parte disso você já imaginou sozinho?', 'Como termina?', 'E logo depois, o que a gente faz?',
+  'O que poderia dar errado, e você gostaria mesmo assim?', 'Quanto tempo isso dura?', 'Em que momento você perde o controle?',
+  'Por que a gente não fez isso hoje?', 'O que eu teria que fazer para você querer o dobro?', 'Qual frase eu falo no seu ouvido nessa hora?',
+  'Qual detalhe você está escondendo do tribunal?', 'De 0 a 10, quanto você quer isso? Justifique a nota.', 'Com que roupa eu chego?'];
+var VOTOS = [['A', 'Absolvida', 'eu faria'], ['R', 'Pena reduzida', 'com ajustes'], ['X', 'Arquivada', 'não é para mim']];
+var SENT = {
+  AA: ['Absolvida por unanimidade', 'A sentença é cumprir. Combinem agora: quando, onde e o que cada um leva.'],
+  AR: ['Absolvida com condições', 'Quem pediu ajuste diz a condição. A defesa aceita ou faz uma contraproposta.'],
+  RR: ['Pena reduzida', 'Cada um descreve uma versão menor que toparia ainda esta semana. Fiquem com a mais gostosa.'],
+  AX: ['Júri dividido', 'Quem arquivou conta o que trava. Quem absolveu conta o que atrai. Escutem sem tentar convencer.'],
+  RX: ['Quase arquivada', 'Existe algum pedaço dessa ideia que funcionaria para quem arquivou? Se não existir, tudo certo.'],
+  XX: ['Arquivada por unanimidade', 'Ninguém quer. Mas digam: que detalhe da defesa, mesmo assim, deu calor?']
+};
+var RODADAS = 6, S = null, T = null;
+
+function esc(s) { return JG.esc(s); }
+function sub(s) { return s.replace(/\{o\}/g, esc(S.n[S.pro])); }
+function sent(a, b) { var k = [a, b].sort(function (x, y) { return 'ARX'.indexOf(x) - 'ARX'.indexOf(y); }).join(''); return SENT[k]; }
+function vnome(k) { for (var i = 0; i < 3; i++) if (VOTOS[i][0] === k) return VOTOS[i][1]; return ''; }
+function stop() { clearInterval(T); T = null; }
+function pts() { document.getElementById('pts').innerHTML = S ? 'Caso <b>' + (S.r + 1) + '</b>/' + S.max : ''; }
+
+function menu() {
+  S = null; stop(); pts();
+  var d = JG.store('tri_nivel'); d = d === null ? 1 : d;
+  var juri = JG.store('tri_juris') || [];
+  (function draw() {
+    JG.view('<h1>Tribunal do Desejo</h1><p class="mut">A cada caso, um de vocês defende uma fantasia. O outro acusa, interroga e quer detalhes. No fim, os dois votam em segredo.</p>' +
+      '<p class="kick">Temperatura</p><div class="row">' + NIV.map(function (n, i) {
+        return '<button class="btn sm' + (d === i ? ' on' : '') + '" data-act="d" data-v="' + i + '">' + n + '</button>';
+      }).join('') + '</div>' +
+      '<p class="kick">Dois celulares</p><button class="btn primary" data-act="new">Abrir sessão neste celular</button><button class="btn" data-act="join">Entrar com o código do outro</button>' +
+      '<p class="kick">Um celular só</p><button class="btn" data-act="one">Jogar passando o celular</button>' +
+      (juri.length ? '<button class="btn ghost sm" data-act="ju">Jurisprudência (' + juri.length + ')</button>' : ''), {
+      d: function (el) { d = +el.getAttribute('data-v'); JG.store('tri_nivel', d); draw(); },
+      'new': function () { quem(function (me) { lobby('' + (100 + Math.floor(Math.random() * 900)) + d, 0, me); }); },
+      join: function () {
+        JG.view('<p class="kick">Entrar</p><h2>Código que aparece no outro celular</h2><input class="input" id="cd" inputmode="numeric" maxlength="4" placeholder="0000" autocomplete="off">' +
+          '<p class="mut small" id="er"></p><button class="btn primary" data-act="ok">Entrar</button><button class="btn ghost sm" data-act="b">Voltar</button>', {
+          ok: function () {
+            var v = document.getElementById('cd').value.trim();
+            if (!/^\d{3}[0-2]$/.test(v)) { document.getElementById('er').textContent = 'São 4 números, iguais aos do outro celular.'; return; }
+            quem(function (me) { lobby(v, 1, me); });
+          },
+          b: menu
+        });
+      },
+      one: function () { JG.needNames(function (n) { start({ two: false, seed: Math.floor(Math.random() * 1e6), lvl: d, n: n }); }); },
+      ju: juris
+    });
+  })();
+}
+
+/* Em dois celulares cada um diz quem é; os nomes podem estar em ordem diferente em cada aparelho. */
+function quem(done) {
+  JG.needNames(function (n) {
+    JG.view('<p class="kick">Este celular</p><h2>Quem está com ele?</h2><button class="btn" data-act="a">' + esc(n[0]) + '</button><button class="btn" data-act="b">' + esc(n[1]) + '</button>' +
+      '<button class="btn ghost sm" data-act="c">Trocar nomes</button>', {
+      a: function () { done(0); }, b: function () { done(1); },
+      c: function () { JG.needNames(function () { quem(done); }, true); }
+    });
+  });
+}
+function lobby(code, role, me) {
+  JG.view('<p class="kick">Sessão aberta</p><div class="code">' + code + '</div><p class="mut">' +
+    (role === 0 ? 'No outro celular: Tribunal do Desejo, "Entrar com o código do outro", e digitar este número.' : 'Código aceito. Os dois celulares estão no mesmo processo.') +
+    '</p><p>Quando os dois estiverem nesta tela, comecem.</p><button class="btn primary" data-act="go">Abrir o primeiro caso</button>', {
+    go: function () { start({ two: true, role: role, me: me, seed: +code, lvl: +code.charAt(3), n: JG.names() }); }
+  });
+}
+
+function start(o) {
+  S = o; S.r = 0; S.max = RODADAS; S.autos = [];
+  S.deck = JG.shuffle(CASOS[S.lvl], JG.rng(S.seed * 13 + 5));
+  caso();
+}
+/* Quem defende: em dois celulares, quem abriu a sessão defende nos casos ímpares. */
+function papeis() {
+  var r = JG.rng(S.seed * 31 + S.r * 7 + 1);
+  S.caso = S.r === 3 ? LIVRE : S.deck[(S.r > 3 ? S.r - 1 : S.r) % S.deck.length];
+  S.prova = JG.pick(PROVAS, r); S.obj = JG.pick(OBJ, r); S.perg = JG.shuffle(PERG, r).slice(0, 3);
+  if (S.two) {
+    S.souDef = (S.role === 0) === (S.r % 2 === 0);
+    S.def = S.souDef ? S.me : 1 - S.me;
+  } else S.def = S.r % 2;
+  S.pro = 1 - S.def;
+}
+function cab() { return '<p class="kick">' + NIV[S.lvl] + '</p><div class="caso">' + esc(S.caso[0]) + '</div><p class="q" style="font-size:1.2rem">' + esc(S.caso[1]) + '</p>'; }
+
+function caso() {
+  papeis(); pts(); stop();
+  var d = esc(S.n[S.def]), p = esc(S.n[S.pro]);
+  if (S.two && !S.souDef) {
+    JG.view('<span class="role">Você acusa</span>' + cab() +
+      '<p class="mut">' + d + ' tem 60 segundos para defender o caso. Você só escuta.</p>' +
+      '<div class="rule">Durante a defesa, você pode interromper <b>uma vez</b> e declarar: objeção, ' + S.obj + '</div>' +
+      '<button class="btn primary" data-act="nx">A defesa terminou. Interrogar</button>', { nx: interrogar }, { back: menu });
+    return;
+  }
+  JG.view((S.two ? '<span class="role">Você defende</span>' : '<span class="role">' + d + ' defende · ' + p + ' acusa</span>') + cab() +
+    '<div class="rule"><b>Prova obrigatória:</b> a defesa precisa usar ' + esc(sub(S.prova)) + '.</div>' +
+    (S.two ? '' : '<div class="rule">' + p + ' pode interromper <b>uma vez</b> e declarar: objeção, ' + S.obj + '</div>') +
+    '<div class="clock" id="ck">1:00</div><button class="btn primary" id="go" data-act="go">Começar a defesa</button>' +
+    '<button class="btn ghost sm" data-act="nx">Defesa encerrada</button>' + (S.r > 0 ? '<button class="btn ghost sm" data-act="bk">‹ Caso anterior (se os celulares desencontraram)</button>' : ''), {
+    go: function () {
+      var t = 60, ck = document.getElementById('ck'), b = document.getElementById('go'); b.disabled = true; stop();
+      T = setInterval(function () {
+        t--; if (!document.getElementById('ck')) { stop(); return; }
+        ck.textContent = '0:' + ('0' + Math.max(t, 0)).slice(-2);
+        if (t <= 0) { stop(); ck.className = 'clock end'; ck.textContent = 'Tempo'; if (navigator.vibrate) navigator.vibrate([200, 100, 200]); }
+      }, 1000);
+    },
+    nx: interrogar,
+    bk: function () { S.r--; S.autos.pop(); caso(); }
+  }, { back: menu });
+}
+
+function interrogar() {
+  stop();
+  var d = esc(S.n[S.def]), p = esc(S.n[S.pro]);
+  var lista = '<ol class="qs">' + S.perg.map(function (q) { return '<li>' + esc(q) + '</li>'; }).join('') + '</ol>';
+  if (S.two && S.souDef) {
+    JG.view('<span class="role">Interrogatório</span><h2>' + p + ' pergunta, você responde</h2>' +
+      '<p class="mut">Três perguntas. Resposta curta não vale: a promotoria pode exigir mais detalhe.</p>' +
+      '<button class="btn primary" data-act="v">Ir ao veredito</button>', { v: votar }, { back: menu });
+    return;
+  }
+  JG.view('<span class="role">Interrogatório</span><h2>' + (S.two ? 'Faça as perguntas a ' + d : p + ' pergunta, ' + d + ' responde') + '</h2>' + lista +
+    '<p class="mut small">Pode emendar perguntas suas. Resposta vaga se repete.</p><button class="btn primary" data-act="v">Ir ao veredito</button>', { v: votar }, { back: menu });
+}
+
+function botoes() {
+  return '<div class="vt">' + VOTOS.map(function (v) { return '<button class="btn" data-act="v" data-v="' + v[0] + '">' + v[1] + '<small>' + v[2] + '</small></button>'; }).join('') + '</div>';
+}
+function votar() {
+  if (S.two) {
+    JG.view('<span class="role">Veredito</span><h2>Seu voto, em segredo</h2><p class="mut">Não deixe ver a tela.</p>' + botoes(), {
+      v: function (el) {
+        var mine = el.getAttribute('data-v');
+        JG.view('<span class="role">Voto lacrado</span><h2>Contem até três e virem as telas juntos</h2><button class="btn primary" data-act="s">Mostrar meu voto</button>', {
+          s: function () {
+            JG.view('<p class="kick">' + esc(S.n[S.me]) + ' votou</p><div class="seal">' + vnome(mine) + '</div><p>E o voto de ' + esc(S.n[1 - S.me]) + '?</p>' +
+              VOTOS.map(function (v) { return '<button class="btn sm" data-act="o" data-v="' + v[0] + '">' + v[1] + '</button>'; }).join(''), {
+              o: function (e2) { sentenca(mine, e2.getAttribute('data-v')); }
+            });
+          }
+        });
+      }
+    }, { back: menu });
+    return;
+  }
+  var a = S.n[0], b = S.n[1];
+  JG.pass(a, b, function () {
+    JG.view('<span class="role">Voto de ' + esc(a) + '</span><h2>Em segredo</h2>' + botoes(), {
+      v: function (el) {
+        var va = el.getAttribute('data-v');
+        JG.pass(b, a, function () {
+          JG.view('<span class="role">Voto de ' + esc(b) + '</span><h2>Em segredo</h2>' + botoes(), {
+            v: function (e2) { sentenca(va, e2.getAttribute('data-v'), true); }
+          });
+        });
+      }
+    });
+  });
+}
+
+function sentenca(a, b, ambos) {
+  var s = sent(a, b);
+  S.autos[S.r] = { t: S.r === 3 ? 'Petição livre' : S.caso[0], k: s[0], win: a !== 'X' && b !== 'X' };
+  var fim = S.r + 1 >= S.max;
+  JG.view('<p class="kick">Sentença</p>' +
+    (ambos ? '<div class="vs"><div><div class="who">' + esc(S.n[0]) + '</div><div class="val">' + vnome(a) + '</div></div><div><div class="who">' + esc(S.n[1]) + '</div><div class="val">' + vnome(b) + '</div></div></div>' : '') +
+    '<div class="caso">' + s[0] + '</div><p class="q" style="font-size:1.2rem">' + s[1] + '</p>' +
+    '<button class="btn primary" data-act="nx">' + (fim ? 'Encerrar a sessão' : 'Próximo caso') + '</button>', {
+    nx: function () { if (fim) autos(); else { S.r++; caso(); } }
+  }, { back: menu });
+}
+
+function autos() {
+  stop();
+  var ganhos = S.autos.filter(function (x) { return x && x.win; });
+  var juri = JG.store('tri_juris') || [];
+  ganhos.forEach(function (x) { if (x.t !== 'Petição livre' && juri.indexOf(x.t) < 0) juri.push(x.t); });
+  JG.store('tri_juris', juri.slice(-40));
+  JG.view('<p class="kick">Autos da sessão</p><h2>' + (ganhos.length ? ganhos.length + ' caso' + (ganhos.length > 1 ? 's absolvidos' : ' absolvido') + '. Agora é cumprir.' : 'Nenhuma absolvição. Tribunal exigente.') + '</h2>' +
+    '<ul class="autos">' + S.autos.map(function (x) { return x ? '<li' + (x.win ? ' class="win"' : '') + '>' + esc(x.t) + '<span>' + x.k + '</span></li>' : ''; }).join('') + '</ul>' +
+    '<button class="btn primary" data-act="m">Mais três casos</button><button class="btn" data-act="h">Voltar ao início</button>' +
+    (S.two ? '<p class="mut small">Para continuarem juntos, apertem "Mais três casos" nos dois celulares.</p>' : ''), {
+    m: function () { S.max += 3; S.r++; caso(); },
+    h: menu
+  });
+}
+function juris() {
+  var j = JG.store('tri_juris') || [];
+  JG.view('<p class="kick">Jurisprudência</p><h2>O que vocês já absolveram</h2><p class="mut small">Fica só neste celular.</p><ul class="autos">' +
+    j.map(function (t) { return '<li class="win">' + esc(t) + '</li>'; }).join('') + '</ul><button class="btn" data-act="b">Voltar</button><button class="btn ghost sm" data-act="z">Apagar lista</button>', {
+    b: menu, z: function () { JG.store('tri_juris', []); menu(); }
+  }, { back: menu });
+}
+
+menu();
+})();
+</script>
+</body>
+</html>
