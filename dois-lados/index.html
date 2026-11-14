@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0d0a14">
+<title>Dois Lados</title>
+<link rel="stylesheet" href="../assets/base.css">
+<style>
+:root{--acc:#b56fd6;--acc-ink:#fff;--glow:rgba(181,111,214,.2)}
+.code{font-size:3.4rem;letter-spacing:.4rem;font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;color:var(--acc);margin:.4rem 0}
+.role{display:inline-block;padding:.3rem .8rem;border-radius:2rem;border:1px solid var(--acc);color:var(--acc);font-size:.75rem;letter-spacing:.12em;text-transform:uppercase}
+.sc{display:flex;flex-wrap:wrap;justify-content:center;margin:.6rem -.2rem}
+.sc .btn{flex:0 0 auto;width:3.1rem;margin:.2rem;padding:.75rem 0}
+.ends{display:flex;justify-content:space-between;font-size:.78rem;color:var(--mut);margin:0 .2rem}
+.ends span{max-width:48%}
+.ends span+span{text-align:right}
+.seal{font-size:2.8rem;font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;font-style:italic;color:var(--acc);margin:.2rem 0 .8rem;line-height:1.1}
+.rule{border:1px dashed var(--acc);border-radius:.8rem;padding:.6rem .8rem;font-size:.95rem;margin:.8rem 0;text-align:left}
+.rule b{color:var(--acc);font-weight:600}
+.vs .g{font-size:.8rem;color:var(--mut);margin-top:.4rem}
+.vs .g b{color:var(--ink)}
+.hit{color:var(--ok)}
+</style>
+</head>
+<body>
+<header class="top"><a href="../">‹ Jogos</a><span class="brand">Dois Lados</span><span class="pts" id="pts"></span></header>
+<main id="app"></main>
+<script src="../assets/app.js"></script>
+<script>
+(function () {
+'use strict';
+/* Cada um responde em segredo e chuta a resposta do outro. Revelam juntos e conversam sobre a diferença.
+   Pergunta: ['e', texto, ponta 0, ponta 10, puxa-conversa] ou ['o', texto, [opções], puxa-conversa]. */
+var NIV = ['Morno', 'Quente', 'Sem filtro'];
+var QS = [[
+['e', 'Quanto você pensa em sexo comigo num dia normal?', 'quase nunca', 'o dia inteiro', 'Quem deu a nota maior conta o último pensamento desse tipo, com todo o detalhe que tiver coragem.'],
+['o', 'O que mais te acende em mim?', ['o olhar', 'a voz', 'o cheiro', 'o jeito que eu toco'], 'Cada um conta o momento em que percebeu isso pela primeira vez.'],
+['o', 'Hora preferida para transar', ['manhã', 'tarde', 'noite', 'madrugada'], 'Se deu diferente, negociem: quem ganha a próxima, e a que horas exatamente?'],
+['e', 'Quanto você gosta de ser provocado antes?', 'direto ao ponto', 'quero sofrer', 'Quem deu a nota maior descreve a provocação perfeita, do primeiro olhar até não aguentar mais.'],
+['o', 'Onde você mais gosta de me beijar?', ['pescoço', 'boca', 'barriga', 'costas'], 'Quem respondeu explica o que sente quando beija ali.'],
+['e', 'Quanto você gosta de ouvir sacanagem no ouvido?', 'prefiro silêncio', 'adoro', 'Quem deu a nota maior diz uma frase que adoraria ouvir. Quem deu a menor diz qual trocaria por outra.'],
+['o', 'A luz, durante:', ['apagada', 'meia-luz', 'acesa', 'tanto faz'], 'Cada um diz o que gosta de ver, ou de não ver.'],
+['e', 'Quão boa foi a última vez?', 'boa', 'inesquecível', 'Cada um diz o melhor segundo daquela vez.'],
+['o', 'Se a gente tivesse uma hora livre agora:', ['banho juntos', 'cama sem pressa', 'rapidinha e comer', 'só beijar'], 'Quem chutou certo descreve como seria essa hora.'],
+['e', 'Quanto você gosta de tomar a iniciativa?', 'espero você', 'sempre eu', 'Contem como cada um percebe que o outro está querendo, sem nenhuma palavra.'],
+['o', 'O que você mais repara quando eu me arrumo?', ['a roupa', 'o perfume', 'o cabelo', 'o que está por baixo'], 'Quem respondeu diz qual combinação faria você desistir de sair de casa.'],
+['e', 'Quão romântico você gosta que seja?', 'nada, quero fogo', 'vela e tudo', 'Descrevam juntos a noite que fica exatamente entre as duas notas.'],
+['o', 'Fora de casa, onde você mais gostaria?', ['hotel bonito', 'praia ou mato', 'carro', 'casa de alguém'], 'Quem escolheu descreve a cena. O outro diz que parte toparia já.'],
+['e', 'Quanto você se sente desejado por mim hoje em dia?', 'pouco', 'muito', 'Cada um diz uma coisa que o outro faz que dá essa sensação, e uma que gostaria que fizesse mais.']
+], [
+['e', 'Quanto você quer ser conduzido?', 'eu conduzo', 'me entrego', 'Alguém está mais de um lado do que o outro imaginava? Digam o que isso quer dizer na prática.'],
+['o', 'Preliminar que você mais gosta de receber', ['boca', 'mãos', 'beijo no corpo todo', 'provocação lenta'], 'Quem respondeu ensina com palavras como gosta, passo a passo.'],
+['o', 'Posição favorita', ['por cima', 'por baixo', 'de quatro', 'de lado'], 'Cada um diz o que tem de especial na sua, e o que mais gosta de ver nela.'],
+['e', 'Quanto você topa brinquedos?', 'nem pensar', 'quero vários', 'Quem deu a nota maior descreve qual seria o primeiro e como seria a estreia.'],
+['o', 'O som que você mais gosta durante:', ['silêncio', 'respiração', 'gemido', 'palavra suja'], 'Cada um diz qual som do outro mais o deixa louco.'],
+['e', 'Quanto te excita alguém quase pegar a gente?', 'zero', 'muito', 'Quem deu a nota maior descreve o lugar ideal para esse risco. O outro diz até onde vai.'],
+['o', 'Depois de transar, você quer:', ['dormir abraçado', 'conversar', 'comer algo', 'de novo'], 'Combinem um depois que tenha um pouco de cada resposta.'],
+['e', 'Quanto você gosta de pegada forte: puxão, tapa, mão firme?', 'delicado', 'forte', 'Os dois dizem onde está o limite, e onde gostariam que estivesse.'],
+['o', 'Se pudesse pedir uma coisa hoje sem explicar:', ['algo com a boca', 'uma posição', 'um lugar', 'uma fantasia'], 'Agora expliquem. Com detalhes.'],
+['e', 'Quanto você gosta de me ver me tocando?', 'não me chama', 'adoraria', 'Quem deu a nota maior diz o que mais quer ver. Quem deu a menor diz o porquê.'],
+['o', 'O melhor tipo de transa é:', ['lenta e longa', 'rápida e urgente', 'com brincadeira', 'com personagem'], 'Cada um conta a última vez que teve exatamente esse tipo.'],
+['e', 'Quanto você topa gravar ou fotografar a gente?', 'nunca', 'quero', 'Quem deu a nota maior diz o que gostaria de ver depois.'],
+['e', 'Quanto do que você quer na cama você realmente pede?', 'quase nada', 'tudo', 'Quem deu a nota menor faz agora um pedido que ainda não tinha feito.'],
+['o', 'O que mais te acende em mim, de roupa:', ['lingerie ou cueca', 'camisa aberta', 'nada', 'roupa de sair'], 'Quem respondeu descreve o momento ideal para tirar.']
+], [
+['e', 'Quanto você topa sexo anal?', 'não', 'quero', 'Cada um diz o que precisaria ser verdade para subir dois pontos, ou por que a nota fica onde está.'],
+['o', 'Onde você quer que eu termine?', ['dentro', 'na boca', 'no corpo', 'tanto faz'], 'Quem chutou errado diz o que achou que seria, e por quê.'],
+['e', 'Quanto você fantasia com outra pessoa junto, só na imaginação?', 'nunca', 'muito', 'Quem deu a nota maior descreve a cena, sem nomes reais. O outro diz o que sente ouvindo.'],
+['o', 'Sexo oral: o que você mais gosta de fazer?', ['devagar, provocando', 'até o fim', 'com as mãos junto', 'depende do dia'], 'Quem respondeu descreve em detalhe a próxima vez.'],
+['e', 'Quanto você gosta de palavrão durante?', 'nada', 'muito', 'Cada um diz em voz alta a palavra que mais gosta de ouvir.'],
+['o', 'A fantasia mais forte que você nunca contou é sobre:', ['um lugar', 'alguém assistindo', 'dominação', 'algo que nunca fizemos'], 'Contem. Quem não quiser contar inteira conta só o começo.'],
+['e', 'Quanto você gosta de ser usado, sem delicadeza nenhuma?', 'não é comigo', 'adoro', 'Quem deu a nota maior descreve como seria. O outro diz o que faria com isso.'],
+['o', 'Numa noite, o ideal é:', ['uma bem feita', 'duas', 'três ou mais', 'até não aguentar'], 'Marquem a noite para testar a resposta mais alta.'],
+['e', 'Quanto você gosta de me ver chegar ao fim?', 'é bom', 'é o melhor', 'Cada um descreve o que vê no rosto do outro nessa hora.'],
+['o', 'Pornô:', ['não assisto', 'às vezes', 'bastante', 'queria ver com você'], 'Cada um conta que tipo de cena mais prende a atenção.'],
+['e', 'Quanto você topa se tocar na minha frente, eu só olhando?', 'travaria', 'faria hoje', 'Quem deu a nota menor diz o que tornaria isso mais fácil.'],
+['o', 'Se eu te mandasse algo agora, você queria:', ['foto sugestiva', 'foto sem roupa', 'vídeo', 'áudio'], 'Combinem quando chega, e o que tem nele.'],
+['e', 'Quanto você gostaria de transar num lugar público?', 'nunca', 'muito', 'Quem deu a nota maior escolhe o lugar. O outro diz a condição.'],
+['o', 'Se eu te acordasse já começando:', ['adoraria', 'depende da hora', 'preferia aviso', 'nem precisa perguntar'], 'Quem chutou errado tem direito a uma pergunta sobre isso, e a resposta tem que ser completa.']
+]];
+var RODADAS = 8, S = null;
+
+function esc(s) { return JG.esc(s); }
+function txt(q, v) { return q[0] === 'e' ? String(v) : q[2][v]; }
+function acerta(q, guess, real) { return q[0] === 'e' ? Math.abs(guess - real) <= 1 : guess === real; }
+function pts() {
+  var e = document.getElementById('pts');
+  e.innerHTML = S ? esc(S.n[0].charAt(0)) + ' <b>' + S.p[0] + '</b> · ' + esc(S.n[1].charAt(0)) + ' <b>' + S.p[1] + '</b>' : '';
+}
+
+function menu() {
+  S = null; pts();
+  var d = JG.store('dl_nivel'); d = d === null ? 1 : d;
+  (function draw() {
+    JG.view('<h1>Dois Lados</h1><p class="mut">Cada um responde em segredo e tenta adivinhar a resposta do outro. Depois, as duas aparecem lado a lado, e a diferença vira assunto.</p>' +
+      '<p class="kick">Temperatura</p><div class="row">' + NIV.map(function (n, i) {
+        return '<button class="btn sm' + (d === i ? ' on' : '') + '" data-act="d" data-v="' + i + '">' + n + '</button>';
+      }).join('') + '</div>' +
+      '<p class="kick">Dois celulares</p><button class="btn primary" data-act="new">Abrir sessão neste celular</button><button class="btn" data-act="join">Entrar com o código do outro</button>' +
+      '<p class="kick">Um celular só</p><button class="btn" data-act="one">Jogar passando o celular</button>', {
+      d: function (el) { d = +el.getAttribute('data-v'); JG.store('dl_nivel', d); draw(); },
+      'new': function () { quem(function (me) { lobby('' + (100 + Math.floor(Math.random() * 900)) + d, me); }); },
+      join: function () {
+        JG.view('<p class="kick">Entrar</p><h2>Código que aparece no outro celular</h2><input class="input" id="cd" inputmode="numeric" maxlength="4" placeholder="0000" autocomplete="off">' +
+          '<p class="mut small" id="er"></p><button class="btn primary" data-act="ok">Entrar</button><button class="btn ghost sm" data-act="b">Voltar</button>', {
+          ok: function () {
+            var v = document.getElementById('cd').value.trim();
+            if (!/^\d{3}[0-2]$/.test(v)) { document.getElementById('er').textContent = 'São 4 números, iguais aos do outro celular.'; return; }
+            quem(function (me) { go({ two: true, me: me, seed: +v, lvl: +v.charAt(3), n: JG.names() }); });
+          },
+          b: menu
+        });
+      },
+      one: function () { JG.needNames(function (n) { go({ two: false, seed: Math.floor(Math.random() * 1e6), lvl: d, n: n }); }); }
+    });
+  })();
+}
+function quem(done) {
+  JG.needNames(function (n) {
+    JG.view('<p class="kick">Este celular</p><h2>Quem está com ele?</h2><button class="btn" data-act="a">' + esc(n[0]) + '</button><button class="btn" data-act="b">' + esc(n[1]) + '</button>' +
+      '<button class="btn ghost sm" data-act="c">Trocar nomes</button>', {
+      a: function () { done(0); }, b: function () { done(1); },
+      c: function () { JG.needNames(function () { quem(done); }, true); }
+    });
+  });
+}
+function lobby(code, me) {
+  JG.view('<p class="kick">Sessão aberta</p><div class="code">' + code + '</div><p class="mut">No outro celular: Dois Lados, "Entrar com o código do outro", e digitar este número.</p>' +
+    '<p>Quando os dois estiverem prontos, comecem.</p><button class="btn primary" data-act="go">Primeira pergunta</button>', {
+    go: function () { go({ two: true, me: me, seed: +code, lvl: +code.charAt(3), n: JG.names() }); }
+  });
+}
+function go(o) {
+  S = o; S.r = 0; S.max = RODADAS; S.p = [0, 0];
+  S.deck = JG.shuffle(QS[S.lvl], JG.rng(S.seed * 17 + 3));
+  rodada();
+}
+
+/* Entrada da resposta: escala 0-10 ou opções. */
+function campo(q) {
+  if (q[0] === 'e') {
+    var b = '';
+    for (var i = 0; i <= 10; i++) b += '<button class="btn" data-act="v" data-v="' + i + '">' + i + '</button>';
+    return '<div class="ends"><span>0 · ' + esc(q[2]) + '</span><span>10 · ' + esc(q[3]) + '</span></div><div class="sc">' + b + '</div>';
+  }
+  return q[2].map(function (o, i) { return '<button class="btn" data-act="v" data-v="' + i + '">' + esc(o) + '</button>'; }).join('');
+}
+/* Pergunta + palpite de uma pessoa; devolve [resposta, palpite]. */
+function responder(eu, outro, done) {
+  var q = S.q;
+  JG.view('<span class="role">' + esc(eu) + ' responde</span><p class="kick">Pergunta ' + (S.r + 1) + ' · ' + NIV[S.lvl] + '</p><p class="q">' + esc(q[1]) + '</p>' + campo(q) +
+    '<p class="mut small">Ninguém olha. Responda o que é verdade, não o que soa bem.</p>', {
+    v: function (el) {
+      var mine = +el.getAttribute('data-v');
+      JG.view('<span class="role">Palpite</span><p class="kick">O que ' + esc(outro) + ' respondeu?</p><p class="q">' + esc(q[1]) + '</p>' + campo(q) +
+        (q[0] === 'e' ? '<p class="mut small">Vale como acerto se ficar a um ponto de distância.</p>' : ''), {
+        v: function (e2) { done(mine, +e2.getAttribute('data-v')); }
+      }, { back: menu });
+    }
+  }, { back: menu });
+}
+
+function rodada() {
+  S.q = S.deck[S.r % S.deck.length]; pts();
+  var eu = S.two ? S.n[S.me] : S.n[0], outro = S.two ? S.n[1 - S.me] : S.n[1];
+  if (S.two) {
+    responder(eu, outro, function (a, g) {
+      JG.view('<span class="role">Lacrado</span><h2>Esperem os dois terminarem</h2><p class="mut">Depois contem até três e virem as telas um para o outro.</p>' +
+        '<button class="btn primary" data-act="s">Mostrar minha tela</button>', {
+        s: function () {
+          JG.view('<p class="kick">' + esc(eu) + '</p><p class="mut small">' + esc(S.q[1]) + '</p><div class="seal">' + esc(txt(S.q, a)) + '</div>' +
+            '<p class="mut">Meu palpite para ' + esc(outro) + ': <b style="color:var(--ink)">' + esc(txt(S.q, g)) + '</b></p>' +
+            '<p class="kick">Quem acertou o palpite?</p><div class="row"><button class="btn sm" data-act="h" data-v="1">Eu</button><button class="btn sm" data-act="h" data-v="2">' + esc(outro) + '</button></div>' +
+            '<div class="row"><button class="btn sm" data-act="h" data-v="3">Os dois</button><button class="btn sm" data-act="h" data-v="0">Ninguém</button></div>', {
+            h: function (el) {
+              var v = +el.getAttribute('data-v');
+              if (v & 1) S.p[S.me]++;
+              if (v & 2) S.p[1 - S.me]++;
+              conversa(v === 0 ? 'Ninguém acertou. Então tem coisa que vocês ainda não sabem um do outro.' : v === 3 ? 'Os dois acertaram. Leitura de mente.' : '');
+            }
+          });
+        }
+      });
+    });
+    return;
+  }
+  JG.pass(eu, outro, function () {
+    responder(eu, outro, function (a0, g0) {
+      JG.pass(outro, eu, function () {
+        responder(outro, eu, function (a1, g1) {
+          var h0 = acerta(S.q, g0, a1), h1 = acerta(S.q, g1, a0);
+          if (h0) S.p[0]++; if (h1) S.p[1]++; pts();
+          function lado(n, a, g, h) {
+            return '<div><div class="who">' + esc(n) + '</div><div class="val">' + esc(txt(S.q, a)) + '</div><div class="g">chutou <b>' + esc(txt(S.q, g)) + '</b>' + (h ? ' <span class="hit">✓</span>' : '') + '</div></div>';
+          }
+          JG.view('<p class="kick">Lado a lado</p><p class="mut">' + esc(S.q[1]) + '</p><div class="vs">' + lado(eu, a0, g0, h0) + lado(outro, a1, g1, h1) + '</div>' +
+            '<button class="btn primary" data-act="c">Conversar sobre isso</button>', {
+            c: function () { conversa(!h0 && !h1 ? 'Ninguém acertou. Então tem coisa que vocês ainda não sabem um do outro.' : h0 && h1 ? 'Os dois acertaram. Leitura de mente.' : ''); }
+          }, { back: menu });
+        });
+      });
+    });
+  });
+}
+
+function conversa(nota) {
+  pts();
+  var fim = S.r + 1 >= S.max;
+  JG.view('<p class="kick">Puxa-conversa</p>' + (nota ? '<p class="mut">' + nota + '</p>' : '') +
+    '<div class="rule">' + esc(S.q[S.q[0] === 'e' ? 4 : 3]) + '</div>' +
+    '<p class="mut small">Sem pressa. Passem para a próxima só quando o assunto esfriar.</p>' +
+    '<button class="btn primary" data-act="nx">' + (fim ? 'Ver o placar' : 'Próxima pergunta') + '</button>', {
+    nx: function () { if (fim) placar(); else { S.r++; rodada(); } }
+  }, { back: menu });
+}
+
+function placar() {
+  var a = S.p[0], b = S.p[1], w = a === b ? -1 : a > b ? 0 : 1;
+  JG.view('<p class="kick">Placar de leitura de mente</p><div class="vs"><div><div class="who">' + esc(S.n[0]) + '</div><div class="big">' + a + '</div></div><div><div class="who">' + esc(S.n[1]) + '</div><div class="big">' + b + '</div></div></div>' +
+    '<h2>' + (w < 0 ? 'Empate.' : esc(S.n[w]) + ' leu melhor.') + '</h2>' +
+    '<div class="rule"><b>Prêmio:</b> ' + (w < 0 ? 'cada um escolhe uma pergunta da noite para o outro responder de novo, agora sem limite e sem resposta curta.' :
+      esc(S.n[w]) + ' escolhe uma pergunta da noite para ' + esc(S.n[1 - w]) + ' responder de novo, agora sem limite e sem resposta curta.') + '</div>' +
+    '<button class="btn primary" data-act="m">Mais quatro perguntas</button><button class="btn" data-act="h">Voltar ao início</button>' +
+    (S.two ? '<p class="mut small">Para continuarem juntos, apertem "Mais quatro perguntas" nos dois celulares.</p>' : ''), {
+    m: function () { S.max += 4; S.r++; rodada(); },
+    h: menu
+  });
+}
+
+menu();
+})();
+</script>
+</body>
+</html>
