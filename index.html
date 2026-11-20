@@ -47,9 +47,10 @@ summary{cursor:pointer;color:var(--ink);padding:.4rem 0}
     { id: 'dupla-chave', n: 'Dupla Chave', c: '#8b98f5', d: 'Cada um vê metade do enigma. Só sai conversando.', i: '2 aparelhos · cooperativo' },
     { id: 'tribunal', n: 'Tribunal do Desejo', c: '#c9474f', d: 'Um defende uma fantasia, o outro interroga. Veredito em segredo.', i: '2 celulares ou 1 · conversa' },
     { id: 'dois-lados', n: 'Dois Lados', c: '#b56fd6', d: 'Cada um responde em segredo e chuta o outro. A diferença vira assunto.', i: '2 celulares ou 1 · conversa' },
-    { id: 'quem-sou-eu', n: 'Quem Sou Eu', c: '#f0a63c', d: 'Cara a cara com atores, personagens de filmes e de séries.', i: '2 celulares · ou na testa' }
+    { id: 'quem-sou-eu', n: 'Quem Sou Eu', c: '#f0a63c', d: 'Cara a cara com atores, personagens de filmes e de séries.', i: '2 celulares · ou na testa' },
+    { id: 'wishlist', n: 'Wishlist', c: '#5cc8f0', d: 'Natal e desejos de sempre. Sua lista em mosaico, a do outro em stories, reserva secreta.', i: 'cada um no seu celular · por link' }
   ];
-  var ready = ['sintonia', 'meia-luz', 'fotograma', 'dupla-chave', 'tribunal', 'dois-lados', 'quem-sou-eu'];
+  var ready = ['sintonia', 'meia-luz', 'fotograma', 'dupla-chave', 'tribunal', 'dois-lados', 'quem-sou-eu', 'wishlist'];
   document.getElementById('tiles').innerHTML = G.map(function (g) {
     var on = ready.indexOf(g.id) >= 0;
     return '<a class="tile' + (on ? '' : ' soon') + '" style="--c:' + g.c + '" ' + (on ? 'href="' + g.id + '/"' : '') + '><b>' + g.n + '</b><span>' + g.d +
